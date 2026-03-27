@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { T } from "@/components/admin/tokens";
 
 export default function AdminError({
   error,
@@ -15,11 +14,11 @@ export default function AdminError({
   }, [error]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60vh", gap: "16px" }}>
-      <p style={{ color: T.textMuted, fontSize: "14px" }}>Bir hata oluştu: {error.message}</p>
+    <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+      <p className="text-admin-text-muted text-sm">Bir hata oluştu: {error.message}</p>
       <button
         onClick={reset}
-        style={{ padding: "9px 20px", background: T.accent, color: "#0f0f0f", border: "none", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "13px" }}
+        className="px-5 py-2 bg-admin-accent text-[#0f0f0f] border-none rounded-lg font-bold cursor-pointer text-[13px]"
       >
         Tekrar Dene
       </button>
