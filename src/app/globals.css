@@ -1,0 +1,483 @@
+@import "tailwindcss";
+
+/* ── Tasarım token'ları ─────────────────────────────── */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Admin tokens mapping from tokens.ts */
+    --admin-bg: #f8fafc;
+    --admin-surface: #f1f5f9;
+    --admin-card: #ffffff;
+    --admin-border: #e2e8f0;
+    --admin-border-hover: #cbd5e1;
+    --admin-border-accent: #c7d2fe;
+    --admin-accent: #6366f1;
+    --admin-accent-light: #818cf8;
+    --admin-accent-dim: #eef2ff;
+    --admin-success: #16a34a;
+    --admin-success-dim: #dcfce7;
+    --admin-warning: #d97706;
+    --admin-warning-dim: #fef3c7;
+    --admin-danger: #dc2626;
+    --admin-danger-dim: #fee2e2;
+    --admin-purple: #7c3aed;
+    --admin-purple-dim: #ede9fe;
+    --admin-text-primary: #0f172a;
+    --admin-text-secondary: #64748b;
+    --admin-text-muted: #94a3b8;
+    --admin-divider: #f1f5f9;
+
+    /* Legacy colors used across site */
+    --dark: #131313;
+    --dark-2: #1c1c1c;
+    --teal: #00e5bc;
+    --teal-dim: rgba(0, 229, 188, 0.15);
+    --sage-bg: #cdd9d5;
+    --white: #ffffff;
+    --white-dim: rgba(255, 255, 255, 0.80);
+    --dark-text: #1a1a1a;
+    --border-dark: rgba(255, 255, 255, 0.10);
+    --border-light: #e5e7eb;
+    
+    --bg: #ffffff;
+    --fg: #111111;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  * {
+    @apply border-border;
+  }
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Admin Tokens in Tailwind */
+  --color-admin-bg: var(--admin-bg);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-card: var(--admin-card);
+  --color-admin-border: var(--admin-border);
+  --color-admin-border-hover: var(--admin-border-hover);
+  --color-admin-border-accent: var(--admin-border-accent);
+  --color-admin-accent: var(--admin-accent);
+  --color-admin-accent-light: var(--admin-accent-light);
+  --color-admin-accent-dim: var(--admin-accent-dim);
+  --color-admin-success: var(--admin-success);
+  --color-admin-success-dim: var(--admin-success-dim);
+  --color-admin-warning: var(--admin-warning);
+  --color-admin-warning-dim: var(--admin-warning-dim);
+  --color-admin-danger: var(--admin-danger);
+  --color-admin-danger-dim: var(--admin-danger-dim);
+  --color-admin-purple: var(--admin-purple);
+  --color-admin-purple-dim: var(--admin-purple-dim);
+  --color-admin-text-primary: var(--admin-text-primary);
+  --color-admin-text-secondary: var(--admin-text-secondary);
+  --color-admin-text-muted: var(--admin-text-muted);
+  --color-admin-divider: var(--admin-divider);
+
+  --shadow-admin: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-admin-lg: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+  --radius-admin: 12px;
+  --radius-admin-sm: 8px;
+  --radius-admin-lg: 14px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--dark);
+  color: var(--white);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+/* ── Content area - white background ─────────────── */
+.content-area {
+  background-color: var(--bg);
+  color: var(--fg);
+  min-height: calc(100vh - 56px);
+}
+
+/* ── Header nav ──────────────────────────────────── */
+.nav-link-hdr {
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  text-decoration: none;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.nav-link-hdr:hover {
+  opacity: 0.65;
+}
+
+/* ── Search icon button ──────────────────────────── */
+.search-icon-btn {
+  width: 56px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.search-icon-btn:hover {
+  color: var(--teal);
+}
+
+/* ── Category cards ──────────────────────────────── */
+.cat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.cat-card:hover {
+  background-color: var(--teal-dim);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ── Partner marquee card ────────────────────────── */
+.partner-card {
+  background: var(--white);
+  border-radius: 14px;
+  width: 160px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dark-text);
+  flex-shrink: 0;
+  letter-spacing: -0.3px;
+}
+
+/* ── Our clients card ────────────────────────────── */
+.client-card {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.client-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Clients CTA button ──────────────────────────── */
+.clients-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 640px;
+  padding: 20px 40px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: opacity 0.15s;
+}
+
+.clients-cta-btn:hover {
+  opacity: 0.82;
+}
+
+/* ── Marquee ─────────────────────────────────────── */
+.marquee-wrapper {
+  overflow: hidden;
+  width: 100%;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Pill CTA button ────────────────────────────── */
+.pill-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 48px;
+  background-color: var(--dark-text);
+  color: var(--white);
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.pill-cta:hover {
+  opacity: 0.82;
+}
+
+/* ── Footer links ────────────────────────────────── */
+.footer-link {
+  font-size: 14px;
+  color: var(--white-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+  display: block;
+}
+
+.footer-link:hover {
+  color: var(--white);
+}
+
+/* ── Login page ──────────────────────────────────── */
+.login-tab {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--white-dim);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.login-tab.active {
+  color: var(--teal);
+  border-bottom-color: var(--teal);
+}
+
+.login-tab:hover {
+  color: var(--white);
+}
+
+.login-input {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  color: var(--white);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.login-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.login-input:focus {
+  border-color: var(--teal);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--teal);
+  color: var(--dark-text);
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.login-btn:hover {
+  opacity: 0.85;
+}
+
+/* ── Content page styles (white bg) ──────────────── */
+.page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .clients-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .clients-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .nav-gap {
+    gap: 20px !important;
+  }
+}
+
+/* ── Header Responsive ──────────────────────────── */
+.desktop-nav {
+  display: flex;
+}
+
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .mobile-nav {
+    display: flex !important;
+  }
+}

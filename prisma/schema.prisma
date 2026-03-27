@@ -1,0 +1,976 @@
+// Prisma schema for TUTAR.NET - E-Ticaret + Hizmet Marketplace Platformu
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums
+enum PartnerType {
+  E_COMMERCE
+  SERVICE
+}
+
+enum ServiceSector {
+  E_COMMERCE
+  BARBER
+  HAIRDRESSER
+  PLUMBER
+  ELECTRICIAN
+  PAINTER
+  SPA
+  CLINIC
+  CLEANING
+  MOVING
+  REPAIR
+  OTHER
+}
+
+enum PartnerStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum RequestStatus {
+  OPEN
+  CLOSED
+  EXPIRED
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum ConversationType {
+  BOOKING
+  QUOTE
+  SUPPORT
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  EDITOR
+  VIEWER
+}
+
+enum ReportType {
+  REVIEW
+  CONTENT
+  PARTNER
+  USER
+  DEAL
+  SPAM
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum ReportSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BannerPlacement {
+  HOME
+  CATEGORY
+  SEARCH
+  PARTNER_DETAIL
+  ALL
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ============================================
+// KULLANICILAR
+// ============================================
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String?
+  password_hash String?
+  avatar_url    String?
+  phone         String?
+  is_admin      Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  partner       Partner?
+  alerts        Alert[]
+  comments      Comment[]
+  votes         Vote[]
+  appointments  Appointment[]
+  service_requests ServiceRequest[]
+  reviews       Review[]
+  conversations Conversation[]
+  sent_messages Message[]   @relation("SentMessages")
+  admin_staff   AdminStaff?
+  filed_reports Report[]    @relation("UserReports")
+
+  @@index([email])
+}
+
+// ============================================
+// PARTNER
+// ============================================
+
+model Partner {
+  id                    String   @id @default(uuid())
+  type                  PartnerType
+  sector                ServiceSector
+  name                  String
+  slug                  String   @unique
+  logo_url              String?
+  description           String?
+  phone                 String?
+  email                 String?
+  website               String?
+  address               String?
+  city                  String?
+  district              String?
+  neighborhood          String?
+  latitude              Float?
+  longitude             Float?
+  status                PartnerStatus @default(PENDING)
+  is_verified           Boolean  @default(false)
+  subscription_status   SubscriptionStatus @default(TRIAL)
+  trial_ends_at         DateTime?
+  view_count            Int      @default(0)
+  click_count           Int      @default(0)
+  rating_average        Decimal  @default(0) @db.Decimal(2, 1)
+  review_count          Int      @default(0)
+  package_type          String   @default("starter")
+  bank_account          String?
+  tax_number            String?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  user_id               String   @unique
+  user                  User     @relation(fields: [user_id], references: [id])
+  products              Product[]
+  feeds                 Feed[]
+  services              Service[]
+  working_hours         WorkingHours[]
+  staff                 Staff[]
+  appointments          Appointment[]
+  quotes                Quote[]
+  reviews               Review[]
+  media                 Media[]
+  conversations         Conversation[]
+  prices                Price[]
+  priceHistories        PriceHistory[]
+
+  @@index([slug])
+  @@index([type])
+  @@index([sector])
+  @@index([city, district])
+  @@index([status])
+  @@index([subscription_status])
+  @@index([rating_average])
+}
+
+// ============================================
+// KATEGORİLER
+// ============================================
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  type        String
+  icon        String?
+  description String?
+  parent_id   String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  typical_duration Int?
+  price_range_min  Decimal? @db.Decimal(10, 2)
+  price_range_max  Decimal? @db.Decimal(10, 2)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  products    Product[]
+  services    Service[]
+  service_requests ServiceRequest[]
+
+  @@index([slug])
+  @@index([parent_id])
+  @@index([type])
+}
+
+// ============================================
+// ÜRÜNLER
+// ============================================
+
+model Product {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  brand        String?
+  model        String?
+  description  String?
+  specs        Json?
+  images       String[]
+  barcode      String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  category_id  String?
+  category     Category?  @relation(fields: [category_id], references: [id])
+  partner_id   String
+  partner      Partner    @relation(fields: [partner_id], references: [id])
+  
+  prices       Price[]
+  priceHistory PriceHistory[]
+  alerts       Alert[]
+  deals        Deal[]
+  feedItems    FeedItem[]
+  reviews      Review[]
+
+  @@index([slug])
+  @@index([category_id])
+  @@index([partner_id])
+  @@index([brand])
+}
+
+model Price {
+  id             String   @id @default(uuid())
+  product_id     String
+  product        Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  partner_id     String
+  partner        Partner  @relation(fields: [partner_id], references: [id], onDelete: Cascade)
+  price          Decimal  @db.Decimal(10, 2)
+  original_price Decimal? @db.Decimal(10, 2)
+  currency       String   @default("TRY")
+  url            String?
+  in_stock       Boolean  @default(true)
+  last_checked   DateTime @default(now())
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@unique([product_id, partner_id])
+  @@index([product_id])
+  @@index([partner_id])
+  @@index([price])
+}
+
+model PriceHistory {
+  id         String   @id @default(uuid())
+  product_id String
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  partner_id String
+  partner    Partner  @relation(fields: [partner_id], references: [id], onDelete: Cascade)
+  price      Decimal  @db.Decimal(10, 2)
+  recorded_at DateTime @default(now())
+
+  @@index([product_id, recorded_at])
+  @@index([partner_id])
+}
+
+// ============================================
+// HİZMETLER
+// ============================================
+
+model Service {
+  id            String   @id @default(uuid())
+  partner_id    String
+  partner       Partner  @relation(fields: [partner_id], references: [id])
+  name          String
+  description   String?
+  duration      Int
+  price_min     Decimal? @db.Decimal(10, 2)
+  price_max     Decimal? @db.Decimal(10, 2)
+  is_active     Boolean  @default(true)
+  category_id   String
+  category      Category @relation(fields: [category_id], references: [id])
+  buffer_time   Int      @default(0)
+  max_booking   Int      @default(1)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  variations    ServiceVariation[]
+  appointments  Appointment[]
+  staff         StaffService[]
+  reviews       Review[]
+
+  @@index([partner_id])
+  @@index([category_id])
+  @@index([is_active])
+}
+
+model ServiceVariation {
+  id          String   @id @default(uuid())
+  service_id  String
+  service     Service  @relation(fields: [service_id], references: [id])
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  duration    Int
+  is_active   Boolean  @default(true)
+
+  @@index([service_id])
+}
+
+// ============================================
+// PERSONEL
+// ============================================
+
+model Staff {
+  id          String   @id @default(uuid())
+  partner_id  String
+  partner     Partner  @relation(fields: [partner_id], references: [id])
+  name        String
+  avatar_url  String?
+  bio         String?
+  phone       String?
+  email       String?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  working_hours StaffWorkingHours[]
+  services    StaffService[]
+  appointments Appointment[]
+
+  @@index([partner_id])
+  @@index([is_active])
+}
+
+model StaffService {
+  id        String  @id @default(uuid())
+  staff_id  String
+  staff     Staff   @relation(fields: [staff_id], references: [id])
+  service_id String
+  service   Service @relation(fields: [service_id], references: [id])
+
+  @@unique([staff_id, service_id])
+  @@index([staff_id])
+  @@index([service_id])
+}
+
+// ============================================
+// ÇALIŞMA SAATLERİ
+// ============================================
+
+model WorkingHours {
+  id          String   @id @default(uuid())
+  partner_id  String
+  partner     Partner  @relation(fields: [partner_id], references: [id])
+  day_of_week Int
+  is_open     Boolean  @default(true)
+  open_time   String
+  close_time  String
+  break_start String?
+  break_end   String?
+
+  @@unique([partner_id, day_of_week])
+  @@index([partner_id])
+}
+
+model StaffWorkingHours {
+  id        String   @id @default(uuid())
+  staff_id  String
+  staff     Staff    @relation(fields: [staff_id], references: [id])
+  day_of_week Int
+  is_open     Boolean @default(true)
+  open_time   String
+  close_time  String
+  break_start String?
+  break_end   String?
+
+  @@unique([staff_id, day_of_week])
+  @@index([staff_id])
+}
+
+// ============================================
+// RANDEVU SİSTEMİ
+// ============================================
+
+model Appointment {
+  id            String   @id @default(uuid())
+  customer_id   String
+  customer      User     @relation(fields: [customer_id], references: [id])
+  partner_id    String
+  partner       Partner  @relation(fields: [partner_id], references: [id])
+  staff_id      String?
+  staff         Staff?   @relation(fields: [staff_id], references: [id])
+  service_id    String
+  service       Service  @relation(fields: [service_id], references: [id])
+  variation_id  String?
+  date          DateTime @db.Date
+  start_time    String
+  end_time      String
+  status        AppointmentStatus @default(PENDING)
+  price         Decimal? @db.Decimal(10, 2)
+  notes         String?
+  customer_notes String?
+  reminder_sent Boolean @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  conversations Conversation[]
+  review        Review?
+
+  @@index([customer_id])
+  @@index([partner_id])
+  @@index([staff_id])
+  @@index([date])
+  @@index([status])
+  @@index([service_id])
+}
+
+// ============================================
+// TEKLİF SİSTEMİ (RFQ)
+// ============================================
+
+model ServiceRequest {
+  id            String   @id @default(uuid())
+  customer_id   String
+  customer      User     @relation(fields: [customer_id], references: [id])
+  title         String
+  description   String
+  category_id   String
+  category      Category @relation(fields: [category_id], references: [id])
+  city          String
+  district      String
+  address       String?
+  latitude      Float?
+  longitude     Float?
+  budget_min    Decimal? @db.Decimal(10, 2)
+  budget_max    Decimal? @db.Decimal(10, 2)
+  deadline      DateTime?
+  photos        String[]
+  status        RequestStatus @default(OPEN)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  quotes        Quote[]
+  conversations Conversation[]
+
+  @@index([customer_id])
+  @@index([category_id])
+  @@index([city, district])
+  @@index([status])
+  @@index([created_at])
+}
+
+model Quote {
+  id              String   @id @default(uuid())
+  partner_id      String
+  partner         Partner  @relation(fields: [partner_id], references: [id])
+  request_id      String
+  request         ServiceRequest @relation(fields: [request_id], references: [id])
+  price           Decimal  @db.Decimal(10, 2)
+  duration        Int?
+  description     String
+  status          QuoteStatus @default(PENDING)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  conversations   Conversation[]
+
+  @@unique([partner_id, request_id])
+  @@index([request_id])
+  @@index([partner_id])
+  @@index([status])
+  @@index([created_at])
+}
+
+// ============================================
+// İLETİŞİM SİSTEMİ
+// ============================================
+
+model Conversation {
+  id            String   @id @default(uuid())
+  type          ConversationType
+  customer_id   String
+  customer      User     @relation(fields: [customer_id], references: [id])
+  partner_id    String
+  partner       Partner  @relation(fields: [partner_id], references: [id])
+  appointment_id String?
+  appointment   Appointment? @relation(fields: [appointment_id], references: [id])
+  request_id    String?
+  request       ServiceRequest? @relation(fields: [request_id], references: [id])
+  quote_id      String?
+  quote         Quote? @relation(fields: [quote_id], references: [id])
+  messages      Message[]
+  last_message_at DateTime @default(now())
+  last_message_text String?
+  customer_unread_count Int @default(0)
+  partner_unread_count  Int @default(0)
+  created_at    DateTime @default(now())
+
+  @@index([customer_id])
+  @@index([partner_id])
+  @@index([appointment_id])
+  @@index([request_id])
+  @@index([quote_id])
+  @@index([last_message_at])
+}
+
+model Message {
+  id              String   @id @default(uuid())
+  conversation_id String
+  conversation    Conversation @relation(fields: [conversation_id], references: [id])
+  sender_id       String
+  sender          User     @relation("SentMessages", fields: [sender_id], references: [id])
+  sender_type     String
+  content         String
+  attachments     String[]
+  read_at         DateTime?
+  created_at      DateTime @default(now())
+
+  @@index([conversation_id])
+  @@index([sender_id])
+  @@index([created_at])
+}
+
+// ============================================
+// YORUM & PUANLAMA
+// ============================================
+
+model Review {
+  id            String   @id @default(uuid())
+  author_id     String
+  author        User     @relation(fields: [author_id], references: [id])
+  partner_id    String
+  partner       Partner  @relation(fields: [partner_id], references: [id])
+  service_id    String?
+  service       Service? @relation(fields: [service_id], references: [id])
+  product_id    String?
+  product       Product? @relation(fields: [product_id], references: [id])
+  appointment_id String? @unique
+  appointment   Appointment? @relation(fields: [appointment_id], references: [id])
+  rating        Int
+  content       String
+  photos        String[]
+  is_verified   Boolean  @default(false)
+  partner_reply String?
+  partner_replied_at DateTime?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@index([author_id])
+  @@index([partner_id])
+  @@index([service_id])
+  @@index([product_id])
+  @@index([rating])
+  @@index([created_at])
+}
+
+// ============================================
+// MEDYA
+// ============================================
+
+model Media {
+  id          String   @id @default(uuid())
+  partner_id  String
+  partner     Partner  @relation(fields: [partner_id], references: [id])
+  type        String
+  url         String
+  thumbnail   String?
+  title       String?
+  description String?
+  created_at  DateTime @default(now())
+
+  @@index([partner_id])
+  @@index([type])
+}
+
+// ============================================
+// E-TİCARET FEED
+// ============================================
+
+model Feed {
+  id                String   @id @default(uuid())
+  partner_id        String
+  partner           Partner  @relation(fields: [partner_id], references: [id])
+  feed_url          String
+  feed_format       String   @default("google_shopping_xml")
+  sync_frequency    String   @default("daily")
+  sync_schedule     DateTime?
+  last_fetch        DateTime?
+  last_sync_count   Int      @default(0)
+  fetch_status      String   @default("pending")
+  error_message     String?
+  is_active         Boolean  @default(true)
+  auto_map_products Boolean  @default(true)
+  mapping_rules     Json?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  items    FeedItem[]
+  syncLogs FeedSyncLog[]
+
+  @@index([partner_id])
+  @@index([is_active])
+  @@index([fetch_status])
+}
+
+model FeedItem {
+  id                String   @id @default(uuid())
+  feed_id           String
+  feed              Feed     @relation(fields: [feed_id], references: [id], onDelete: Cascade)
+  external_id       String
+  product_name      String
+  description       String?
+  product_url       String
+  image_url         String?
+  additional_images String[]
+  price             Decimal  @db.Decimal(10, 2)
+  sale_price        Decimal? @db.Decimal(10, 2)
+  currency          String   @default("TRY")
+  availability      String   @default("in_stock")
+  condition         String   @default("new")
+  brand             String?
+  gtin              String?
+  mpn               String?
+  google_category_id String?
+  product_type      String?
+  shipping_weight   String?
+  attributes        Json?
+  sync_status       String   @default("pending")
+  last_updated      DateTime @default(now())
+  created_at        DateTime @default(now())
+  product_id        String?
+  product           Product? @relation(fields: [product_id], references: [id])
+
+  @@unique([feed_id, external_id])
+  @@index([product_id])
+  @@index([sync_status])
+}
+
+model FeedSyncLog {
+  id            String   @id @default(uuid())
+  feed_id       String
+  feed          Feed     @relation(fields: [feed_id], references: [id], onDelete: Cascade)
+  status        String
+  items_total   Int      @default(0)
+  items_new     Int      @default(0)
+  items_updated Int      @default(0)
+  items_failed  Int      @default(0)
+  error_message String?
+  started_at    DateTime @default(now())
+  completed_at  DateTime?
+
+  @@index([feed_id])
+  @@index([started_at])
+}
+
+// ============================================
+// FIRSATLAR
+// ============================================
+
+model Deal {
+  id              String   @id @default(uuid())
+  product_id      String?
+  product         Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  title           String
+  description     String?
+  url             String
+  price           Decimal? @db.Decimal(10, 2)
+  original_price  Decimal? @db.Decimal(10, 2)
+  upvotes         Int      @default(0)
+  downvotes       Int      @default(0)
+  is_hot          Boolean  @default(false)
+  is_frontpage    Boolean  @default(false)
+  is_verified     Boolean  @default(false)
+  expires_at      DateTime?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  comments        Comment[]
+  votes           Vote[]
+
+  @@index([is_hot])
+  @@index([is_frontpage])
+  @@index([upvotes])
+  @@index([created_at])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  deal_id   String
+  deal      Deal     @relation(fields: [deal_id], references: [id], onDelete: Cascade)
+  content   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([deal_id])
+  @@index([user_id])
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  deal_id   String
+  deal      Deal     @relation(fields: [deal_id], references: [id], onDelete: Cascade)
+  vote_type Boolean
+  created_at DateTime @default(now())
+
+  @@unique([user_id, deal_id])
+  @@index([deal_id])
+}
+
+// ============================================
+// ALERT
+// ============================================
+
+model Alert {
+  id           String   @id @default(uuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product_id   String
+  product      Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  target_price Decimal  @db.Decimal(10, 2)
+  is_active    Boolean  @default(true)
+  notified_at  DateTime?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([product_id])
+  @@index([is_active])
+}
+
+// ============================================
+// ABONELİK PAKETLERİ
+// ============================================
+
+model SubscriptionPackage {
+  id              String   @id @default(uuid())
+  name            String
+  display_name    String
+  price_monthly   Decimal  @db.Decimal(10, 2)
+  price_yearly    Decimal? @db.Decimal(10, 2)
+  max_products    Int
+  max_services    Int
+  max_staff       Int
+  max_appointments_monthly Int
+  features        Json
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@index([name])
+  @@index([is_active])
+}
+
+// ============================================
+// ADMIN PERSONEL & YETKİLENDİRME
+// ============================================
+
+model AdminStaff {
+  id           String    @id @default(uuid())
+  user_id      String    @unique
+  user         User      @relation(fields: [user_id], references: [id])
+  role         AdminRole @default(VIEWER)
+  display_name String
+  avatar_url   String?
+  is_active    Boolean   @default(true)
+  last_login   DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  permissions      Permission[]
+  audit_logs       AuditLog[]
+  resolved_reports Report[]
+
+  @@index([user_id])
+  @@index([role])
+  @@index([is_active])
+}
+
+model Permission {
+  id         String     @id @default(uuid())
+  staff_id   String
+  staff      AdminStaff @relation(fields: [staff_id], references: [id], onDelete: Cascade)
+  resource   String
+  action     String
+  granted    Boolean    @default(true)
+  created_at DateTime   @default(now())
+
+  @@unique([staff_id, resource, action])
+  @@index([staff_id])
+}
+
+// ============================================
+// PLATFORM YÖNETİMİ
+// ============================================
+
+model SiteSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  group       String
+  label       String
+  description String?
+  type        String   @default("string")
+  is_public   Boolean  @default(false)
+  updated_at  DateTime @updatedAt
+  updated_by  String?
+
+  @@index([group])
+  @@index([is_public])
+}
+
+model AuditLog {
+  id          String      @id @default(uuid())
+  staff_id    String?
+  staff       AdminStaff? @relation(fields: [staff_id], references: [id], onDelete: SetNull)
+  action      String
+  resource    String
+  resource_id String
+  old_value   Json?
+  new_value   Json?
+  ip_address  String?
+  user_agent  String?
+  metadata    Json?
+  created_at  DateTime    @default(now())
+
+  @@index([staff_id])
+  @@index([resource, resource_id])
+  @@index([action])
+  @@index([created_at])
+}
+
+model Report {
+  id              String         @id @default(uuid())
+  type            ReportType
+  reason          String
+  description     String
+  status          ReportStatus   @default(PENDING)
+  severity        ReportSeverity @default(LOW)
+  reported_by_id  String
+  reported_by     User           @relation("UserReports", fields: [reported_by_id], references: [id])
+  target_type     String
+  target_id       String
+  target_label    String
+  resolved_by_id  String?
+  resolved_by     AdminStaff?    @relation(fields: [resolved_by_id], references: [id], onDelete: SetNull)
+  resolution_note String?
+  resolved_at     DateTime?
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([severity])
+  @@index([reported_by_id])
+  @@index([target_type, target_id])
+  @@index([created_at])
+}
+
+// ============================================
+// İÇERİK YÖNETİMİ
+// ============================================
+
+model Banner {
+  id           String          @id @default(uuid())
+  title        String
+  subtitle     String?
+  image_url    String?
+  link_url     String?
+  link_text    String?
+  placement    BannerPlacement @default(HOME)
+  is_active    Boolean         @default(true)
+  priority     Int             @default(0)
+  start_at     DateTime?
+  end_at       DateTime?
+  target_blank Boolean         @default(false)
+  created_by   String?
+  created_at   DateTime        @default(now())
+  updated_at   DateTime        @updatedAt
+
+  @@index([placement, is_active])
+  @@index([start_at, end_at])
+}
+
+model AnnouncementBar {
+  id         String    @id @default(uuid())
+  message    String
+  link_url   String?
+  link_text  String?
+  bg_color   String    @default("#00e5bc")
+  text_color String    @default("#0f0f0f")
+  is_active  Boolean   @default(false)
+  start_at   DateTime?
+  end_at     DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model Page {
+  id           String     @id @default(uuid())
+  title        String
+  slug         String     @unique
+  content      String     @db.Text
+  excerpt      String?
+  status       PageStatus @default(DRAFT)
+  template     String     @default("default")
+  seo_title    String?
+  seo_desc     String?
+  og_image     String?
+  published_at DateTime?
+  created_by   String?
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([status])
+}
+
+model SeoMeta {
+  id          String   @id @default(uuid())
+  route       String   @unique
+  title       String?
+  description String?
+  og_title    String?
+  og_desc     String?
+  og_image    String?
+  robots      String   @default("index,follow")
+  canonical   String?
+  schema_json Json?
+  updated_at  DateTime @updatedAt
+  updated_by  String?
+
+  @@index([route])
+}
