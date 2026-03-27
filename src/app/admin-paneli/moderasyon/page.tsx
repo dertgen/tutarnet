@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Flag, AlertTriangle, MessageSquare, Star, CheckCircle, XCircle, Eye, Clock, UserCircle } from "lucide-react";
 import {
   PageHeader, AdminCard, Badge, FilterTabs, SearchInput,
-  DataTable, LoadingSpinner, AvatarInitials, IconBtn, Pagination, Toast, T,
+  DataTable, LoadingSpinner, AvatarInitials, IconBtn, Pagination, MetricCard, Toast,
 } from "@/components/admin/ui";
 import type { ReportAdminView, ReportListResponse, ReportType } from "@/types/admin";
 
@@ -110,34 +110,34 @@ export default function ModerationPage() {
     const busy = actionId === r.id;
 
     return [
-      <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-        <TypeIcon size={14} color={T.textMuted} />
+      <div className="flex items-center gap-2">
+        <TypeIcon size={14} className="text-muted-foreground" />
         <Badge variant={ty.variant}>{ty.label}</Badge>
       </div>,
       <div>
-        <div style={{ fontSize: "13.5px", color: T.textPrimary, fontWeight: 500 }}>{r.reason}</div>
-        <div style={{ fontSize: "11.5px", color: T.textMuted, marginTop: "2px", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <div className="text-[13.5px] font-medium text-foreground">{r.reason}</div>
+        <div className="text-[11.5px] text-muted-foreground mt-0.5 max-w-[200px] truncate">
           {r.description}
         </div>
       </div>,
-      <span style={{ fontSize: "12.5px", color: T.textMuted, maxWidth: "140px", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+      <span className="text-[12.5px] text-muted-foreground max-w-[140px] block truncate">
         {r.target_label}
       </span>,
-      <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+      <div className="flex items-center gap-2">
         <AvatarInitials name={r.reported_by.name ?? r.reported_by.email} size={26} />
-        <span style={{ fontSize: "12.5px", color: T.textSecondary }}>{r.reported_by.name ?? "—"}</span>
+        <span className="text-[12.5px] text-muted-foreground">{r.reported_by.name ?? "—"}</span>
       </div>,
       <Badge variant={sv.variant}>{sv.label}</Badge>,
       <Badge variant={st.variant}>{st.label}</Badge>,
-      <span style={{ fontSize: "12px", color: T.textMuted, whiteSpace: "nowrap" }}>
+      <span className="text-xs text-muted-foreground whitespace-nowrap">
         {new Date(r.created_at).toLocaleDateString("tr-TR", { day: "2-digit", month: "short" })}
       </span>,
-      <div style={{ display: "flex", gap: "5px" }}>
+      <div className="flex gap-1.5">
         <IconBtn icon={Eye} title="Görüntüle" />
         {r.status === "PENDING" && (
           <>
-            <IconBtn icon={busy ? Clock : CheckCircle} color={T.success} title="Çöz" onClick={() => updateStatus(r.id, "RESOLVED")} />
-            <IconBtn icon={busy ? Clock : XCircle} color={T.danger} title="Reddet" onClick={() => updateStatus(r.id, "DISMISSED")} />
+            <IconBtn icon={busy ? Clock : CheckCircle} color="#16a34a" title="Çöz" onClick={() => updateStatus(r.id, "RESOLVED")} />
+            <IconBtn icon={busy ? Clock : XCircle} color="#dc2626" title="Reddet" onClick={() => updateStatus(r.id, "DISMISSED")} />
           </>
         )}
       </div>,
@@ -151,30 +151,27 @@ export default function ModerationPage() {
       {toast && <Toast ok={toast.ok} text={toast.text} />}
 
       {counts.PENDING > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 20px", background: T.warningDim, border: `1px solid rgba(245,158,11,0.2)`, borderRadius: T.radius, marginBottom: "24px" }}>
-          <AlertTriangle size={18} color={T.warning} />
-          <span style={{ fontSize: "13.5px", color: T.textPrimary }}>
-            <strong style={{ color: T.warning }}>{counts.PENDING} rapor</strong> inceleme bekliyor — acil işlem gerektirebilir
+        <div className="flex items-center gap-3 px-5 py-3.5 bg-amber-50 border border-amber-200/50 rounded-xl mb-6">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+          <span className="text-[13.5px] text-foreground">
+            <strong className="text-amber-600">{counts.PENDING} rapor</strong> inceleme bekliyor — acil işlem gerektirebilir
           </span>
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: "16px", marginBottom: "24px" }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Toplam Rapor",  value: total,            color: T.accent,  bg: T.accentDim },
-          { label: "Bekleyen",      value: counts.PENDING,   color: T.warning, bg: T.warningDim },
-          { label: "İnceleniyor",   value: counts.REVIEWED,  color: T.accent,  bg: T.accentDim },
-          { label: "Çözüldü",       value: counts.RESOLVED,  color: T.success, bg: T.successDim },
+          { label: "Toplam Rapor",  value: total,            colorClass: "text-admin-accent" },
+          { label: "Bekleyen",      value: counts.PENDING,   colorClass: "text-amber-600" },
+          { label: "İnceleniyor",   value: counts.REVIEWED,  colorClass: "text-admin-accent" },
+          { label: "Çözüldü",       value: counts.RESOLVED,  colorClass: "text-emerald-600" },
         ].map((s, i) => (
-          <AdminCard key={i} style={{ padding: "16px 20px" }}>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: s.color, letterSpacing: "-0.4px" }}>{s.value}</div>
-            <div style={{ fontSize: "12px", color: T.textMuted, marginTop: "4px" }}>{s.label}</div>
-          </AdminCard>
+          <MetricCard key={i} label={s.label} value={s.value} colorClass={s.colorClass} />
         ))}
       </div>
 
-      <AdminCard style={{ padding: "20px" }}>
-        <div style={{ display: "flex", gap: "12px", marginBottom: "20px", flexWrap: "wrap", alignItems: "center" }}>
+      <AdminCard className="p-5">
+        <div className="flex flex-wrap items-center gap-3 mb-5">
           <FilterTabs
             tabs={[
               { key: "ALL",      label: "Tümü",       count: total },
@@ -185,7 +182,7 @@ export default function ModerationPage() {
             active={activeTab}
             onChange={(tab) => { setActiveTab(tab); setPage(1); }}
           />
-          <div style={{ flex: 1, minWidth: "200px" }}>
+          <div className="flex-1 min-w-[200px]">
             <SearchInput value={search} onChange={setSearch} placeholder="Neden veya hedef ara…" />
           </div>
         </div>

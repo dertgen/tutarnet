@@ -23,6 +23,9 @@
   "menuAccent": "subtle",
   "registries": {
     "@arc": "https://witharc.co/r/{name}.json",
-    "@eldoraui": "https://eldoraui.site/r/{name}.json"
+    "@eldoraui": "https://eldoraui.site/r/{name}.json",
+    "@bundui": {
+      "url": "https://bundui.io/api/registry/{name}.json"
+    }
   }
 }

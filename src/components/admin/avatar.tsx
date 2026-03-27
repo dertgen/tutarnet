@@ -19,20 +19,29 @@ function getInitials(name: string): string {
     .join("");
 }
 
+const sizeClasses: Record<number, string> = {
+  24: "w-6 h-6 text-[9px]",
+  26: "w-[26px] h-[26px] text-[10px]",
+  28: "w-7 h-7 text-[10px]",
+  32: "w-8 h-8 text-xs",
+  36: "w-9 h-9 text-sm",
+  40: "w-10 h-10 text-sm",
+  48: "w-12 h-12 text-base",
+};
+
 export function AvatarInitials({ name, size = 36, color, className }: AvatarInitialsProps) {
   const initials = getInitials(name);
+  const sizeClass = sizeClasses[size];
+
   return (
     <Avatar
-      className={cn("flex-shrink-0 select-none", className)}
-      style={{
-        width: size,
-        height: size,
-      }}
+      className={cn("flex-shrink-0 select-none", sizeClass ?? "", className)}
+      style={!sizeClass ? { width: size, height: size } : undefined}
     >
       <AvatarFallback
-        className="text-white font-semibold"
+        className={cn("text-white font-semibold", !sizeClass && "text-sm")}
         style={{
-          fontSize: size * 0.38,
+          fontSize: sizeClass ? undefined : size * 0.38,
           background: color ?? "var(--color-admin-accent)",
         }}
       >
@@ -59,9 +68,12 @@ export function IconBtn({ icon: Icon, title, color, onClick, disabled, className
       title={title}
       onClick={onClick}
       disabled={disabled}
-      className={cn("w-8 h-8 rounded-lg", className)}
+      className={cn(
+        "w-8 h-8 rounded-lg hover:bg-muted/80 transition-colors",
+        className,
+      )}
     >
-      <Icon className="w-4 h-4" style={{ color: color }} strokeWidth={1.8} />
+      <Icon className="w-4 h-4" style={color ? { color } : undefined} strokeWidth={1.8} />
     </Button>
   );
 }

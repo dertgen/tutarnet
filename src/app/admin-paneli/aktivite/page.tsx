@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Activity } from "lucide-react";
 import {
-  PageHeader, AdminCard, Badge, SearchInput, LoadingSpinner,
-  DataTable, AvatarInitials, FilterTabs, Pagination, T,
+  PageHeader, Badge, SearchInput, LoadingSpinner,
+  DataTable, AvatarInitials, FilterTabs, Pagination, MetricCard,
 } from "@/components/admin/ui";
+import { Card } from "@/components/ui/card";
 import type { AuditLogResponse, AuditLogView } from "@/types/admin";
 
 const ACTION_MAP: Record<string, { label: string; variant: "green" | "blue" | "red" | "yellow" | "gray" }> = {
@@ -56,29 +57,29 @@ export default function AktivitePage() {
     const action = ACTION_MAP[log.action] ?? { label: log.action, variant: "gray" as const };
     const hasChange = log.old_value !== null || log.new_value !== null;
     return [
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <AvatarInitials name={log.staff?.display_name ?? "Sistem"} size={28} color={T.accent} />
+      <div className="flex items-center gap-2">
+        <AvatarInitials name={log.staff?.display_name ?? "Sistem"} size={28} />
         <div>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: T.textPrimary }}>{log.staff?.display_name ?? "Sistem"}</div>
-          <div style={{ fontSize: "11px", color: T.textMuted }}>{log.staff?.role ?? "—"}</div>
+          <div className="text-[13px] font-semibold text-foreground">{log.staff?.display_name ?? "Sistem"}</div>
+          <div className="text-[11px] text-muted-foreground">{log.staff?.role ?? "—"}</div>
         </div>
       </div>,
       <Badge variant={action.variant}>{action.label}</Badge>,
       <div>
-        <div style={{ fontSize: "13px", color: T.textPrimary, fontWeight: 500 }}>{log.resource}</div>
-        <div style={{ fontSize: "11px", color: T.textMuted, fontFamily: "monospace" }}>{log.resource_id.slice(0, 12)}…</div>
+        <div className="text-[13px] font-medium text-foreground">{log.resource}</div>
+        <div className="text-[11px] text-muted-foreground font-mono">{log.resource_id.slice(0, 12)}…</div>
       </div>,
-      <div style={{ fontSize: "11.5px", color: T.textMuted }}>
+      <div className="text-[11.5px] text-muted-foreground">
         {hasChange ? (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-            <span style={{ color: T.danger }}>eski</span>
-            <span style={{ color: T.divider }}>→</span>
-            <span style={{ color: T.success }}>yeni</span>
+          <span className="inline-flex items-center gap-1">
+            <span className="text-red-500">eski</span>
+            <span className="text-border">→</span>
+            <span className="text-emerald-600">yeni</span>
           </span>
         ) : <span>—</span>}
       </div>,
-      <span style={{ fontSize: "11.5px", color: T.textMuted, fontFamily: "monospace" }}>{log.ip_address ?? "—"}</span>,
-      <span style={{ fontSize: "12px", color: T.textMuted, whiteSpace: "nowrap" }}>
+      <span className="text-[11.5px] text-muted-foreground font-mono">{log.ip_address ?? "—"}</span>,
+      <span className="text-xs text-muted-foreground whitespace-nowrap">
         {new Date(log.created_at).toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
       </span>,
     ];
@@ -88,22 +89,19 @@ export default function AktivitePage() {
     <>
       <PageHeader title="Aktivite Günlüğü" description="Sistemde gerçekleştirilen tüm admin işlemlerinin kaydı" />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: "16px", marginBottom: "24px" }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Toplam Kayıt", value: total,                                               color: T.accent,  bg: T.accentDim },
-          { label: "Oluşturma",    value: logs.filter((l) => l.action === "CREATE").length,    color: T.success, bg: T.successDim },
-          { label: "Güncelleme",   value: logs.filter((l) => l.action === "UPDATE").length,    color: T.accent,  bg: T.accentDim },
-          { label: "Silme",        value: logs.filter((l) => l.action === "DELETE").length,    color: T.danger,  bg: T.dangerDim },
+          { label: "Toplam Kayıt", value: total,                                               colorClass: "text-admin-accent" },
+          { label: "Oluşturma",    value: logs.filter((l) => l.action === "CREATE").length,    colorClass: "text-emerald-600" },
+          { label: "Güncelleme",   value: logs.filter((l) => l.action === "UPDATE").length,    colorClass: "text-admin-accent" },
+          { label: "Silme",        value: logs.filter((l) => l.action === "DELETE").length,    colorClass: "text-red-600" },
         ].map((s, i) => (
-          <AdminCard key={i} style={{ padding: "16px 20px" }}>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: s.color, letterSpacing: "-0.4px" }}>{s.value}</div>
-            <div style={{ fontSize: "12px", color: T.textMuted, marginTop: "4px" }}>{s.label}</div>
-          </AdminCard>
+          <MetricCard key={i} label={s.label} value={s.value} colorClass={s.colorClass} />
         ))}
       </div>
 
-      <AdminCard style={{ padding: "20px" }}>
-        <div style={{ display: "flex", gap: "12px", marginBottom: "20px", flexWrap: "wrap", alignItems: "center" }}>
+      <Card className="p-5">
+        <div className="flex flex-wrap items-center gap-3 mb-5">
           <FilterTabs
             tabs={[
               { key: "ALL",     label: "Tümü" },
@@ -115,14 +113,14 @@ export default function AktivitePage() {
             active={actionFilter}
             onChange={(tab) => { setActionFilter(tab); setPage(1); }}
           />
-          <div style={{ flex: 1, minWidth: "200px" }}>
+          <div className="flex-1 min-w-[200px]">
             <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Kaynak veya ID ara…" />
           </div>
         </div>
 
         {loading ? <LoadingSpinner /> : <DataTable columns={COLS} rows={rows} emptyLabel="Kayıt bulunamadı" />}
         <Pagination page={page} total={total} limit={30} onChange={setPage} />
-      </AdminCard>
+      </Card>
     </>
   );
 }
