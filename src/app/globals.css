@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 /* ── Tasarım token'ları ─────────────────────────────── */
 @layer base {

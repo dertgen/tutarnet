@@ -7,8 +7,8 @@ import {
   Save, RefreshCw, CheckCircle, XCircle, ChevronRight,
   Eye, EyeOff, Info, AlertTriangle, Copy, RotateCcw,
 } from "lucide-react";
-import { T } from "@/components/admin/tokens";
 import { LoadingSpinner, PageHeader } from "@/components/admin/ui";
+import { cn } from "@/lib/utils";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 type FieldType = "text" | "email" | "url" | "password" | "number" | "textarea"
@@ -691,16 +691,8 @@ const CATEGORIES: Category[] = [
   },
 ];
 
-/* ─── Inline styles ──────────────────────────────────────────── */
-const inp: React.CSSProperties = {
-  width: "100%", padding: "9px 13px",
-  background: "#ffffff",
-  border: `1px solid ${T.border}`,
-  borderRadius: "9px", color: T.textPrimary,
-  fontSize: "13.5px", outline: "none",
-  transition: "border-color 0.18s",
-  boxSizing: "border-box",
-};
+/* ─── Input base class ──────────────────────────────────────── */
+const inpClass = "w-full px-[13px] py-[9px] bg-white border border-admin-border rounded-[9px] text-admin-text-primary text-[13.5px] outline-none transition-[border-color] duration-[180ms] box-border";
 
 /* ─── Field renderer ─────────────────────────────────────────── */
 function FieldRenderer({
@@ -724,26 +716,20 @@ function FieldRenderer({
   if (field.type === "toggle") {
     const on = value === "true";
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div className="flex items-center gap-3">
         <button
           onClick={() => onChange(on ? "false" : "true")}
-          style={{
-            width: "44px", height: "24px", borderRadius: "12px",
-            background: on ? T.accent : T.border,
-            border: "none", cursor: "pointer", position: "relative",
-            transition: "background 0.2s", flexShrink: 0,
-          }}
+          className={cn(
+            "w-[44px] h-6 rounded-xl border-none cursor-pointer relative transition-colors duration-200 shrink-0",
+            on ? "bg-admin-accent" : "bg-admin-border"
+          )}
         >
-          <span style={{
-            position: "absolute", top: "3px",
-            left: on ? "23px" : "3px",
-            width: "18px", height: "18px",
-            borderRadius: "50%", background: "#fff",
-            transition: "left 0.2s",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
-          }} />
+          <span className={cn(
+            "absolute top-[3px] w-[18px] h-[18px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-[left] duration-200",
+            on ? "left-[23px]" : "left-[3px]"
+          )} />
         </button>
-        <span style={{ fontSize: "13px", color: on ? T.success : T.textMuted, fontWeight: 500 }}>
+        <span className={cn("text-[13px] font-medium", on ? "text-admin-success" : "text-admin-text-muted")}>
           {on ? "Açık" : "Kapalı"}
         </span>
       </div>
@@ -755,7 +741,7 @@ function FieldRenderer({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ ...inp, appearance: "auto", cursor: "pointer" }}
+        className={cn(inpClass, "appearance-auto cursor-pointer")}
       >
         {field.options?.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -766,21 +752,21 @@ function FieldRenderer({
 
   if (field.type === "color") {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <div className="flex items-center gap-2.5">
         <input
           type="color"
           value={value || "#6366f1"}
           onChange={(e) => onChange(e.target.value)}
-          style={{ width: "44px", height: "38px", borderRadius: "8px", border: `1px solid ${T.border}`, cursor: "pointer", padding: "2px", background: "#fff" }}
+          className="w-[44px] h-[38px] rounded-lg border border-admin-border cursor-pointer p-0.5 bg-white"
         />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{ ...inp, width: "140px", fontFamily: "monospace" }}
+          className={cn(inpClass, "w-[140px] font-mono")}
           placeholder="#000000"
         />
-        <div style={{ width: "38px", height: "38px", borderRadius: "8px", background: value || "#e2e8f0", border: `1px solid ${T.border}` }} />
+        <div className="w-[38px] h-[38px] rounded-lg border border-admin-border" style={{ background: value || "#e2e8f0" }} />
       </div>
     );
   }
@@ -792,7 +778,7 @@ function FieldRenderer({
         onChange={(e) => onChange(e.target.value)}
         rows={field.type === "json" ? 6 : 4}
         placeholder={field.placeholder}
-        style={{ ...inp, resize: "vertical", lineHeight: 1.6, fontFamily: field.type === "json" ? "monospace" : "inherit" }}
+        className={cn(inpClass, "resize-y leading-[1.6]", field.type === "json" && "font-mono")}
       />
     );
   }
@@ -804,7 +790,7 @@ function FieldRenderer({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={field.placeholder ?? "virgülle ayırın: tag1, tag2"}
-        style={inp}
+        className={inpClass}
       />
     );
   }
@@ -812,25 +798,25 @@ function FieldRenderer({
   if (field.type === "range") {
     const numVal = parseInt(value) || field.min || 0;
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <div className="flex items-center gap-3.5">
         <input
           type="range"
           min={field.min ?? 0}
           max={field.max ?? 100}
           value={numVal}
           onChange={(e) => onChange(e.target.value)}
-          style={{ flex: 1, accentColor: T.accent }}
+          className="flex-1 accent-admin-accent"
         />
-        <div style={{ display: "flex", alignItems: "center", gap: "4px", minWidth: "70px" }}>
+        <div className="flex items-center gap-1 min-w-[70px]">
           <input
             type="number"
             value={numVal}
             min={field.min}
             max={field.max}
             onChange={(e) => onChange(e.target.value)}
-            style={{ ...inp, width: "64px", textAlign: "center" }}
+            className={cn(inpClass, "w-16 text-center")}
           />
-          {field.unit && <span style={{ fontSize: "12px", color: T.textMuted, whiteSpace: "nowrap" }}>{field.unit}</span>}
+          {field.unit && <span className="text-xs text-admin-text-muted whitespace-nowrap">{field.unit}</span>}
         </div>
       </div>
     );
@@ -838,20 +824,20 @@ function FieldRenderer({
 
   if (field.type === "password") {
     return (
-      <div style={{ position: "relative" }}>
+      <div className="relative">
         <input
           type={showPass ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.placeholder ?? "••••••••"}
           autoComplete="new-password"
-          style={{ ...inp, paddingRight: "72px" }}
+          className={cn(inpClass, "pr-[72px]")}
         />
-        <div style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", display: "flex", gap: "4px" }}>
-          <button onClick={() => setShowPass(!showPass)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMuted, padding: "4px", display: "flex", alignItems: "center" }}>
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+          <button onClick={() => setShowPass(!showPass)} className="bg-transparent border-none cursor-pointer text-admin-text-muted p-1 flex items-center">
             {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
           </button>
-          <button onClick={copy} style={{ background: "none", border: "none", cursor: "pointer", color: copyDone ? T.success : T.textMuted, padding: "4px", display: "flex", alignItems: "center" }}>
+          <button onClick={copy} className={cn("bg-transparent border-none cursor-pointer p-1 flex items-center", copyDone ? "text-admin-success" : "text-admin-text-muted")}>
             <Copy size={14} />
           </button>
         </div>
@@ -861,7 +847,7 @@ function FieldRenderer({
 
   const withUnit = field.unit && field.type === "number";
   return (
-    <div style={{ position: "relative" }}>
+    <div className="relative">
       <input
         type={field.type === "number" ? "number" : field.type === "email" ? "email" : field.type === "url" ? "url" : "text"}
         value={value}
@@ -870,10 +856,10 @@ function FieldRenderer({
         min={field.min}
         max={field.max}
         autoComplete={field.sensitive ? "off" : undefined}
-        style={{ ...inp, paddingRight: withUnit ? "60px" : inp.paddingRight as string }}
+        className={cn(inpClass, withUnit && "pr-[60px]")}
       />
       {withUnit && (
-        <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", fontSize: "12px", color: T.textMuted, pointerEvents: "none", whiteSpace: "nowrap" }}>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-admin-text-muted pointer-events-none whitespace-nowrap">
           {field.unit}
         </span>
       )}
@@ -884,12 +870,12 @@ function FieldRenderer({
 /* ─── Badge component ────────────────────────────────────────── */
 function FieldBadge({ type }: { type: "new" | "pro" | "beta" }) {
   const cfg = {
-    new:  { label: "YENİ",  bg: "#dcfce7", color: "#16a34a" },
-    pro:  { label: "PRO",   bg: "#ede9fe", color: "#7c3aed" },
-    beta: { label: "BETA",  bg: "#fef3c7", color: "#b45309" },
+    new:  { label: "YENİ",  cls: "bg-admin-success-dim text-[#16a34a]" },
+    pro:  { label: "PRO",   cls: "bg-admin-purple-dim text-[#7c3aed]" },
+    beta: { label: "BETA",  cls: "bg-admin-warning-dim text-[#b45309]" },
   }[type];
   return (
-    <span style={{ fontSize: "9.5px", fontWeight: 700, background: cfg.bg, color: cfg.color, padding: "1px 6px", borderRadius: "4px", letterSpacing: "0.05em" }}>
+    <span className={cn("text-[9.5px] font-bold px-1.5 py-px rounded tracking-wide", cfg.cls)}>
       {cfg.label}
     </span>
   );
@@ -1011,26 +997,26 @@ export default function SiteAyarlariPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div style={{ maxWidth: "1300px", margin: "0 auto" }}>
+    <div className="max-w-[1300px] mx-auto">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "28px", flexWrap: "wrap", gap: "14px" }}>
+      <div className="flex items-start justify-between mb-7 flex-wrap gap-3.5">
         <div>
-          <h1 style={{ fontSize: "24px", fontWeight: 700, color: T.textPrimary, margin: 0, letterSpacing: "-0.5px" }}>
+          <h1 className="text-2xl font-bold text-admin-text-primary m-0 tracking-tight">
             Site Ayarları
           </h1>
-          <p style={{ color: T.textSecondary, marginTop: "5px", fontSize: "13.5px" }}>
+          <p className="text-admin-text-secondary mt-[5px] text-[13.5px]">
             Sitenizin tüm yapılandırmasını buradan yönetin — {CATEGORIES.reduce((acc, c) => acc + c.sections.reduce((a, s) => a + s.fields.length, 0), 0)} ayar, {CATEGORIES.length} kategori
           </p>
         </div>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <div className="flex gap-2.5 flex-wrap">
           <button
             onClick={load}
-            style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 16px", background: T.surface, border: `1px solid ${T.border}`, borderRadius: "9px", color: T.textSecondary, fontSize: "13px", cursor: "pointer", fontWeight: 500 }}
+            className="flex items-center gap-[7px] px-4 py-[9px] bg-admin-surface border border-admin-border rounded-[9px] text-admin-text-secondary text-[13px] cursor-pointer font-medium"
           >
             <RefreshCw size={14} /> Yenile
           </button>
           {isDirty && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", background: "#fef9c3", border: "1px solid #fde68a", borderRadius: "9px", fontSize: "12.5px", color: "#b45309" }}>
+            <div className="flex items-center gap-1.5 px-3.5 py-[9px] bg-[#fef9c3] border border-[#fde68a] rounded-[9px] text-[12.5px] text-[#b45309]">
               <AlertTriangle size={13} />
               {changedCount} kaydedilmemiş değişiklik
             </div>
@@ -1038,7 +1024,10 @@ export default function SiteAyarlariPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 20px", background: T.accent, border: "none", borderRadius: "9px", color: "#fff", fontSize: "13.5px", cursor: saving ? "not-allowed" : "pointer", fontWeight: 600, opacity: saving ? 0.7 : 1 }}
+            className={cn(
+              "flex items-center gap-[7px] px-5 py-[9px] bg-admin-accent border-none rounded-[9px] text-white text-[13.5px] font-semibold",
+              saving ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+            )}
           >
             <Save size={15} /> {saving ? "Kaydediliyor…" : "Kaydet"}
           </button>
@@ -1047,26 +1036,24 @@ export default function SiteAyarlariPage() {
 
       {/* Toast */}
       {toast && (
-        <div style={{
-          display: "flex", alignItems: "center", gap: "10px",
-          padding: "13px 18px", borderRadius: "10px", marginBottom: "20px",
-          background: toast.ok ? "#dcfce7" : "#fee2e2",
-          border: `1px solid ${toast.ok ? "#bbf7d0" : "#fecaca"}`,
-          color: toast.ok ? "#16a34a" : "#dc2626",
-          fontSize: "13.5px", fontWeight: 500,
-        }}>
+        <div className={cn(
+          "flex items-center gap-2.5 px-[18px] py-[13px] rounded-[10px] mb-5 text-[13.5px] font-medium",
+          toast.ok
+            ? "bg-[#dcfce7] border border-[#bbf7d0] text-[#16a34a]"
+            : "bg-[#fee2e2] border border-[#fecaca] text-[#dc2626]"
+        )}>
           {toast.ok ? <CheckCircle size={16} /> : <XCircle size={16} />}
           {toast.text}
         </div>
       )}
 
       {/* Layout */}
-      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "20px", alignItems: "flex-start" }}>
+      <div className="grid grid-cols-[220px_1fr] gap-5 items-start">
 
         {/* Left sidebar: categories */}
-        <div style={{ background: "#fff", border: `1px solid ${T.border}`, borderRadius: "14px", overflow: "hidden", position: "sticky", top: "78px" }}>
-          <div style={{ padding: "14px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: T.textMuted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Kategoriler</span>
+        <div className="bg-white border border-admin-border rounded-[14px] overflow-hidden sticky top-[78px]">
+          <div className="px-3 pt-3.5 pb-2.5 border-b border-admin-border">
+            <span className="text-[11px] font-bold text-admin-text-muted uppercase tracking-[0.08em]">Kategoriler</span>
           </div>
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.id;
@@ -1076,62 +1063,65 @@ export default function SiteAyarlariPage() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                style={{
-                  display: "flex", alignItems: "center", gap: "10px",
-                  width: "100%", padding: "11px 14px", border: "none",
-                  cursor: "pointer", textAlign: "left",
-                  background: isActive ? T.accentDim : "transparent",
-                  borderLeft: isActive ? `3px solid ${T.accent}` : "3px solid transparent",
-                  transition: "all 0.15s",
-                }}
+                className={cn(
+                  "flex items-center gap-2.5 w-full px-3.5 py-[11px] border-none cursor-pointer text-left transition-all duration-150",
+                  isActive
+                    ? "bg-admin-accent-dim border-l-[3px] border-l-admin-accent"
+                    : "bg-transparent border-l-[3px] border-l-transparent"
+                )}
               >
-                <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: isActive ? T.accentDim : T.surface, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: isActive ? `1px solid ${T.accentBorder}` : `1px solid ${T.border}` }}>
-                  <CatIcon size={14} color={isActive ? T.accent : T.textMuted} strokeWidth={1.8} />
+                <div className={cn(
+                  "w-[30px] h-[30px] rounded-lg flex items-center justify-center shrink-0 border",
+                  isActive
+                    ? "bg-admin-accent-dim border-admin-border-accent"
+                    : "bg-admin-surface border-admin-border"
+                )}>
+                  <CatIcon size={14} className={isActive ? "text-admin-accent" : "text-admin-text-muted"} strokeWidth={1.8} />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "13px", fontWeight: isActive ? 600 : 400, color: isActive ? T.accent : T.textSecondary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <div className="flex-1 min-w-0">
+                  <div className={cn(
+                    "text-[13px] whitespace-nowrap overflow-hidden text-ellipsis",
+                    isActive ? "font-semibold text-admin-accent" : "font-normal text-admin-text-secondary"
+                  )}>
                     {cat.label}
                   </div>
-                  <div style={{ fontSize: "11px", color: T.textMuted }}>{totalFields} ayar</div>
+                  <div className="text-[11px] text-admin-text-muted">{totalFields} ayar</div>
                 </div>
-                {isActive && <ChevronRight size={13} color={T.accent} />}
+                {isActive && <ChevronRight size={13} className="text-admin-accent" />}
               </button>
             );
           })}
         </div>
 
         {/* Right: sections + fields */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+        <div className="flex flex-col">
 
           {/* Category header */}
-          <div style={{ background: "#fff", border: `1px solid ${T.border}`, borderRadius: "14px 14px 0 0", padding: "20px 24px", borderBottom: "none" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: `${category.color}15`, border: `1px solid ${category.color}30`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="bg-white border border-admin-border rounded-t-[14px] px-6 py-5 border-b-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-[10px] flex items-center justify-center" style={{ background: `${category.color}15`, border: `1px solid ${category.color}30` }}>
                 <category.icon size={18} color={category.color} strokeWidth={1.8} />
               </div>
               <div>
-                <h2 style={{ fontSize: "17px", fontWeight: 700, color: T.textPrimary, margin: 0 }}>{category.label}</h2>
-                <p style={{ fontSize: "13px", color: T.textMuted, margin: "2px 0 0" }}>{category.description}</p>
+                <h2 className="text-[17px] font-bold text-admin-text-primary m-0">{category.label}</h2>
+                <p className="text-[13px] text-admin-text-muted mt-0.5 mb-0">{category.description}</p>
               </div>
             </div>
 
             {/* Section tabs */}
-            <div style={{ display: "flex", gap: "4px", marginTop: "18px", borderBottom: `1px solid ${T.border}`, paddingBottom: "0", marginBottom: "-20px" }}>
+            <div className="flex gap-1 mt-[18px] border-b border-admin-border pb-0 -mb-5">
               {category.sections.map((sec) => {
                 const isActive = activeSection === sec.id;
                 return (
                   <button
                     key={sec.id}
                     onClick={() => setActiveSection(sec.id)}
-                    style={{
-                      padding: "9px 16px", border: "none", background: "transparent",
-                      cursor: "pointer", fontSize: "13px",
-                      fontWeight: isActive ? 600 : 400,
-                      color: isActive ? T.accent : T.textSecondary,
-                      borderBottom: isActive ? `2px solid ${T.accent}` : "2px solid transparent",
-                      marginBottom: "-1px", transition: "all 0.15s",
-                      whiteSpace: "nowrap",
-                    }}
+                    className={cn(
+                      "px-4 py-[9px] border-none bg-transparent cursor-pointer text-[13px] whitespace-nowrap -mb-px transition-all duration-150",
+                      isActive
+                        ? "font-semibold text-admin-accent border-b-2 border-b-admin-accent"
+                        : "font-normal text-admin-text-secondary border-b-2 border-b-transparent"
+                    )}
                   >
                     {sec.title}
                   </button>
@@ -1142,57 +1132,56 @@ export default function SiteAyarlariPage() {
 
           {/* Section content */}
           {section && (
-            <div style={{ background: "#fff", border: `1px solid ${T.border}`, borderRadius: "0 0 14px 14px", padding: "28px 24px" }}>
+            <div className="bg-white border border-admin-border rounded-b-[14px] px-6 py-7">
               {section.description && (
-                <div style={{ display: "flex", gap: "10px", padding: "12px 16px", background: "#f8fafc", border: `1px solid ${T.border}`, borderRadius: "9px", marginBottom: "28px" }}>
-                  <Info size={15} color={T.textMuted} style={{ flexShrink: 0, marginTop: "1px" }} />
-                  <p style={{ fontSize: "13px", color: T.textSecondary, margin: 0, lineHeight: 1.5 }}>{section.description}</p>
+                <div className="flex gap-2.5 px-4 py-3 bg-[#f8fafc] border border-admin-border rounded-[9px] mb-7">
+                  <Info size={15} className="text-admin-text-muted shrink-0 mt-px" />
+                  <p className="text-[13px] text-admin-text-secondary m-0 leading-normal">{section.description}</p>
                 </div>
               )}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+              <div className="flex flex-col">
                 {section.fields.map((field, idx) => {
                   const val = values[field.key] ?? field.defaultValue;
                   const isChanged = val !== (loadedValues[field.key] ?? field.defaultValue);
                   return (
                     <div
                       key={field.key}
-                      style={{
-                        display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: "24px", alignItems: "flex-start",
-                        padding: "20px 0",
-                        borderBottom: idx < section.fields.length - 1 ? `1px solid ${T.divider}` : "none",
-                      }}
+                      className={cn(
+                        "grid grid-cols-[1fr_1.4fr] gap-6 items-start py-5",
+                        idx < section.fields.length - 1 && "border-b border-admin-divider"
+                      )}
                     >
                       {/* Label column */}
                       <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "5px" }}>
-                          <label style={{ fontSize: "13.5px", fontWeight: 600, color: T.textPrimary, display: "block" }}>
+                        <div className="flex items-center gap-[7px] mb-[5px]">
+                          <label className="text-[13.5px] font-semibold text-admin-text-primary block">
                             {field.label}
                           </label>
                           {field.badge && <FieldBadge type={field.badge} />}
                           {isChanged && (
-                            <span style={{ fontSize: "10px", fontWeight: 700, background: "#fef9c3", color: "#b45309", padding: "1px 6px", borderRadius: "4px" }}>
+                            <span className="text-[10px] font-bold bg-[#fef9c3] text-[#b45309] px-1.5 py-px rounded">
                               DEĞİŞTİ
                             </span>
                           )}
                           {!isChanged && sources[field.key] === "db" && (
-                            <span style={{ fontSize: "10px", fontWeight: 600, background: "#dcfce7", color: "#16a34a", padding: "1px 6px", borderRadius: "4px" }}>
+                            <span className="text-[10px] font-semibold bg-[#dcfce7] text-[#16a34a] px-1.5 py-px rounded">
                               DB
                             </span>
                           )}
                           {!isChanged && sources[field.key] === "env" && (
-                            <span style={{ fontSize: "10px", fontWeight: 600, background: "#eff6ff", color: "#2563eb", padding: "1px 6px", borderRadius: "4px" }}>
+                            <span className="text-[10px] font-semibold bg-[#eff6ff] text-[#2563eb] px-1.5 py-px rounded">
                               ENV
                             </span>
                           )}
                         </div>
                         {field.description && (
-                          <p style={{ fontSize: "12.5px", color: T.textMuted, margin: 0, lineHeight: 1.5 }}>
+                          <p className="text-[12.5px] text-admin-text-muted m-0 leading-normal">
                             {field.description}
                           </p>
                         )}
                         {field.sensitive && (
-                          <p style={{ fontSize: "11.5px", color: T.warning, margin: "4px 0 0", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <p className="text-[11.5px] text-admin-warning mt-1 mb-0 flex items-center gap-1">
                             <Shield size={11} /> Hassas bilgi — güvenli saklayın
                           </p>
                         )}
@@ -1212,17 +1201,20 @@ export default function SiteAyarlariPage() {
               </div>
 
               {/* Section footer */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "28px", paddingTop: "20px", borderTop: `1px solid ${T.border}` }}>
+              <div className="flex justify-between items-center mt-7 pt-5 border-t border-admin-border">
                 <button
                   onClick={handleReset}
-                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", background: T.surface, border: `1px solid ${T.border}`, borderRadius: "8px", color: T.textMuted, fontSize: "12.5px", cursor: "pointer", fontWeight: 500 }}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-admin-surface border border-admin-border rounded-lg text-admin-text-muted text-[12.5px] cursor-pointer font-medium"
                 >
                   <RotateCcw size={13} /> Varsayılana Sıfırla
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 22px", background: T.accent, border: "none", borderRadius: "9px", color: "#fff", fontSize: "13.5px", cursor: saving ? "not-allowed" : "pointer", fontWeight: 600, opacity: saving ? 0.7 : 1 }}
+                  className={cn(
+                    "flex items-center gap-[7px] px-[22px] py-[9px] bg-admin-accent border-none rounded-[9px] text-white text-[13.5px] font-semibold",
+                    saving ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+                  )}
                 >
                   <Save size={14} /> {saving ? "Kaydediliyor…" : "Değişiklikleri Kaydet"}
                 </button>

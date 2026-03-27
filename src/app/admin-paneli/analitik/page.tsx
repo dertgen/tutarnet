@@ -2,12 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { ArrowUpRight, ArrowDownRight, RefreshCw, BarChart3 } from "lucide-react";
-import { PageHeader, AdminCard, SectionHeader, LoadingSpinner, ErrorState, T } from "@/components/admin/ui";
+import { PageHeader, AdminCard, SectionHeader, LoadingSpinner, ErrorState } from "@/components/admin/ui";
+import { cn } from "@/lib/utils";
 import type { StatsResponse } from "@/types/admin";
+
+/* Admin color CSS variable references for SVG/dynamic usage */
+const COLORS = {
+  accent:      "var(--color-admin-accent)",
+  accentLight: "var(--color-admin-accent-light)",
+  purple:      "var(--color-admin-purple)",
+  success:     "var(--color-admin-success)",
+  warning:     "var(--color-admin-warning)",
+  danger:      "var(--color-admin-danger)",
+} as const;
 
 function LineChartSVG({ data, color }: { data: number[]; color: string }) {
   const W = 400, H = 80;
-  if (data.length < 2) return <div style={{ height: H, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "12px", color: T.textMuted }}>Yeterli veri yok</span></div>;
+  if (data.length < 2) return <div className="flex items-center justify-center" style={{ height: H }}><span className="text-xs text-admin-text-muted">Yeterli veri yok</span></div>;
   const min = Math.min(...data), max = Math.max(...data), range = max - min || 1;
   const pts = data.map((v, i) => `${(i / (data.length - 1)) * W},${H - ((v - min) / range) * (H - 10)}`);
   const area = `0,${H} ${pts.join(" ")} ${W},${H}`;
@@ -28,8 +39,8 @@ function LineChartSVG({ data, color }: { data: number[]; color: string }) {
 
 function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
   return (
-    <div style={{ flex: 1, height: "5px", borderRadius: "3px", background: "#e2e8f0" }}>
-      <div style={{ height: "100%", width: `${max > 0 ? (value / max) * 100 : 0}%`, background: color, borderRadius: "3px", transition: "width 0.8s ease" }} />
+    <div className="flex-1 h-[5px] rounded-sm bg-slate-200">
+      <div className="h-full rounded-sm transition-[width] duration-[800ms] ease-in-out" style={{ width: `${max > 0 ? (value / max) * 100 : 0}%`, background: color }} />
     </div>
   );
 }
@@ -38,8 +49,8 @@ function BarChartSVG({ data, color }: { data: { label: string; value: number }[]
   const max = Math.max(...data.map(d => d.value), 1);
   const H = 120, W = 480, bw = Math.floor(W / data.length) - 8;
   return (
-    <div style={{ width: "100%", overflowX: "auto" }}>
-      <svg width="100%" height={H + 28} viewBox={`0 0 ${W} ${H + 28}`} preserveAspectRatio="none" style={{ display: "block" }}>
+    <div className="w-full overflow-x-auto">
+      <svg width="100%" height={H + 28} viewBox={`0 0 ${W} ${H + 28}`} preserveAspectRatio="none" className="block">
         <defs>
           <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity="1" />
@@ -94,22 +105,22 @@ export default function AnalyticsPage() {
   const kpiCards = [
     {
       label: "Toplam Partner",   value: kpis.total_partners.toLocaleString("tr-TR"),
-      change: "+12%", trend: "up" as const, color: T.accent,
+      change: "+12%", trend: "up" as const, color: COLORS.accent,
       data: partner_trend.length > 1 ? partner_trend.map(p => p.count) : [0, kpis.total_partners],
     },
     {
       label: "Aktif Kullanıcı",  value: kpis.total_users.toLocaleString("tr-TR"),
-      change: "+8%", trend: "up" as const, color: T.purple,
+      change: "+8%", trend: "up" as const, color: COLORS.purple,
       data: user_trend.length > 1 ? user_trend.map(p => p.count) : [0, kpis.total_users],
     },
     {
       label: "Toplam Hizmet",    value: kpis.total_services.toLocaleString("tr-TR"),
-      change: "+15%", trend: "up" as const, color: T.success,
+      change: "+15%", trend: "up" as const, color: COLORS.success,
       data: [0, kpis.total_services],
     },
     {
       label: "Toplam Randevu",   value: kpis.total_appointments.toLocaleString("tr-TR"),
-      change: "+23%", trend: "up" as const, color: T.warning,
+      change: "+23%", trend: "up" as const, color: COLORS.warning,
       data: [0, kpis.total_appointments],
     },
   ];
@@ -121,10 +132,10 @@ export default function AnalyticsPage() {
   }));
 
   const partnerSegments = [
-    { label: "E-Ticaret",     value: kpis.ecommerce_partners, color: T.accent },
-    { label: "Hizmet",        value: kpis.service_partners,   color: T.purple },
-    { label: "Aktif",         value: kpis.active_partners,    color: T.success },
-    { label: "Bekleyen",      value: kpis.pending_partners,   color: T.warning },
+    { label: "E-Ticaret",     value: kpis.ecommerce_partners, color: COLORS.accent },
+    { label: "Hizmet",        value: kpis.service_partners,   color: COLORS.purple },
+    { label: "Aktif",         value: kpis.active_partners,    color: COLORS.success },
+    { label: "Bekleyen",      value: kpis.pending_partners,   color: COLORS.warning },
   ];
 
   return (
@@ -137,23 +148,37 @@ export default function AnalyticsPage() {
         ]}
       />
 
-      <div style={{ display: "flex", gap: "4px", padding: "4px", background: T.surface, border: `1px solid ${T.border}`, borderRadius: "10px", width: "fit-content", marginBottom: "24px" }}>
+      <div className="flex gap-1 p-1 bg-admin-surface border border-admin-border rounded-[10px] w-fit mb-6">
         {(["7d", "30d", "90d"] as const).map((p) => (
-          <button key={p} onClick={() => setPeriod(p)} style={{ padding: "7px 16px", borderRadius: "7px", fontSize: "13px", fontWeight: period === p ? 600 : 400, cursor: "pointer", border: "none", background: period === p ? T.accent : "transparent", color: period === p ? "#fff" : T.textMuted, transition: "all 0.18s" }}>
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={cn(
+              "px-4 py-[7px] rounded-[7px] text-[13px] cursor-pointer border-none transition-all duration-[180ms]",
+              period === p
+                ? "bg-admin-accent text-white font-semibold"
+                : "bg-transparent text-admin-text-muted font-normal"
+            )}
+          >
             {p === "7d" ? "7 Gün" : p === "30d" ? "30 Gün" : "90 Gün"}
           </button>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))", gap: "16px", marginBottom: "24px" }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-6">
         {kpiCards.map((k, i) => (
           <AdminCard key={i}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
+            <div className="flex justify-between mb-4">
               <div>
-                <div style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{k.label}</div>
-                <div style={{ fontSize: "26px", fontWeight: 800, color: T.textPrimary, letterSpacing: "-0.5px" }}>{k.value}</div>
+                <div className="text-xs text-admin-text-muted mb-1.5 uppercase tracking-wide">{k.label}</div>
+                <div className="text-[26px] font-extrabold text-admin-text-primary tracking-tight">{k.value}</div>
               </div>
-              <span style={{ fontSize: "12px", fontWeight: 600, color: k.trend === "up" ? T.success : T.danger, background: k.trend === "up" ? T.successDim : T.dangerDim, padding: "3px 8px", borderRadius: "999px", height: "fit-content", display: "flex", alignItems: "center", gap: "3px" }}>
+              <span className={cn(
+                "text-xs font-semibold px-2 py-[3px] rounded-full h-fit flex items-center gap-[3px]",
+                k.trend === "up"
+                  ? "text-admin-success bg-admin-success-dim"
+                  : "text-admin-danger bg-admin-danger-dim"
+              )}>
                 {k.trend === "up" ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {k.change}
               </span>
             </div>
@@ -162,34 +187,34 @@ export default function AnalyticsPage() {
         ))}
       </div>
 
-      <AdminCard style={{ marginBottom: "24px" }}>
+      <AdminCard className="mb-6">
         <SectionHeader title="Aylık Büyüme Trendi" subtitle="Partner sayısı — aylık bazda" />
-        <BarChartSVG data={monthlyData} color={T.accent} />
-        <div style={{ display: "flex", gap: "12px", marginTop: "16px", flexWrap: "wrap" }}>
+        <BarChartSVG data={monthlyData} color={COLORS.accent} />
+        <div className="flex gap-3 mt-4 flex-wrap">
           {[
             { label: "Toplam Partner",  value: kpis.total_partners, sub: `${kpis.active_partners} aktif` },
             { label: "Bu Ay Yeni Üye",  value: kpis.new_users_this_month, sub: "kullanıcı" },
             { label: "Açık Rapor",      value: kpis.open_reports, sub: "bekliyor" },
           ].map((s, i) => (
-            <div key={i} style={{ padding: "12px 18px", background: T.surface, border: `1px solid ${T.border}`, borderRadius: "10px", flex: 1, minWidth: "120px" }}>
-              <div style={{ fontSize: "11px", color: T.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</div>
-              <div style={{ fontSize: "20px", fontWeight: 700, color: T.textPrimary, marginTop: "4px", letterSpacing: "-0.4px" }}>{s.value.toLocaleString("tr-TR")}</div>
-              <div style={{ fontSize: "11px", color: T.accent, marginTop: "2px" }}>{s.sub}</div>
+            <div key={i} className="px-[18px] py-3 bg-admin-surface border border-admin-border rounded-[10px] flex-1 min-w-[120px]">
+              <div className="text-[11px] text-admin-text-muted uppercase tracking-wide">{s.label}</div>
+              <div className="text-xl font-bold text-admin-text-primary mt-1 tracking-tight">{s.value.toLocaleString("tr-TR")}</div>
+              <div className="text-[11px] text-admin-accent mt-0.5">{s.sub}</div>
             </div>
           ))}
         </div>
       </AdminCard>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="analytics-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <AdminCard>
           <SectionHeader title="Partner Dağılımı" subtitle="Tip ve durum bazında dağılım" />
           {partnerSegments.map((seg, i) => (
-            <div key={i} style={{ marginBottom: i < partnerSegments.length - 1 ? "14px" : 0 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "12.5px" }}>
-                <span style={{ color: T.textSecondary }}>{seg.label}</span>
-                <span style={{ color: T.textPrimary, fontWeight: 600 }}>
+            <div key={i} className={i < partnerSegments.length - 1 ? "mb-3.5" : ""}>
+              <div className="flex justify-between mb-1.5 text-[12.5px]">
+                <span className="text-admin-text-secondary">{seg.label}</span>
+                <span className="text-admin-text-primary font-semibold">
                   {seg.value}
-                  <span style={{ color: T.textMuted, fontWeight: 400 }}> / {kpis.total_partners}</span>
+                  <span className="text-admin-text-muted font-normal"> / {kpis.total_partners}</span>
                 </span>
               </div>
               <MiniBar value={seg.value} max={kpis.total_partners || 1} color={seg.color} />
@@ -200,22 +225,21 @@ export default function AnalyticsPage() {
         <AdminCard>
           <SectionHeader title="Platform Özeti" subtitle="Gerçek zamanlı istatistikler" />
           {[
-            { label: "Aktif Partner",    value: kpis.active_partners,      color: T.success },
-            { label: "Toplam Hizmet",    value: kpis.total_services,       color: T.purple },
-            { label: "Toplam Ürün",      value: kpis.total_products,       color: T.accent },
-            { label: "Açık Rapor",       value: kpis.open_reports,         color: T.warning },
-            { label: "Bu Ay Yeni Üye",   value: kpis.new_users_this_month, color: T.accentLight },
+            { label: "Aktif Partner",    value: kpis.active_partners,      color: COLORS.success },
+            { label: "Toplam Hizmet",    value: kpis.total_services,       color: COLORS.purple },
+            { label: "Toplam Ürün",      value: kpis.total_products,       color: COLORS.accent },
+            { label: "Açık Rapor",       value: kpis.open_reports,         color: COLORS.warning },
+            { label: "Bu Ay Yeni Üye",   value: kpis.new_users_this_month, color: COLORS.accentLight },
           ].map((item, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < 4 ? `1px solid ${T.divider}` : "none" }}>
-              <span style={{ fontSize: "13px", color: T.textSecondary }}>{item.label}</span>
-              <span style={{ fontSize: "16px", fontWeight: 700, color: item.color, letterSpacing: "-0.3px" }}>
+            <div key={i} className={cn("flex justify-between items-center py-2.5", i < 4 && "border-b border-admin-divider")}>
+              <span className="text-[13px] text-admin-text-secondary">{item.label}</span>
+              <span className="text-base font-bold tracking-tight" style={{ color: item.color }}>
                 {item.value.toLocaleString("tr-TR")}
               </span>
             </div>
           ))}
         </AdminCard>
       </div>
-      <style>{`@media (max-width: 800px) { .analytics-grid { grid-template-columns: 1fr !important; } }`}</style>
     </>
   );
 }
