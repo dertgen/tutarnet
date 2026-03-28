@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowUpRight, ArrowDownRight, RefreshCw, BarChart3 } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, RefreshCw } from "lucide-react";
 import { PageHeader, AdminCard, SectionHeader, LoadingSpinner, ErrorState } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api-client";
 import type { StatsResponse } from "@/types/admin";
 
-/* Admin color CSS variable references for SVG/dynamic usage */
 const COLORS = {
   accent:      "var(--color-admin-accent)",
   accentLight: "var(--color-admin-accent-light)",
@@ -18,7 +18,7 @@ const COLORS = {
 
 function LineChartSVG({ data, color }: { data: number[]; color: string }) {
   const W = 400, H = 80;
-  if (data.length < 2) return <div className="flex items-center justify-center" style={{ height: H }}><span className="text-xs text-admin-text-muted">Yeterli veri yok</span></div>;
+  if (!data || data.length < 2) return <div className="flex items-center justify-center" style={{ height: H }}><span className="text-xs text-admin-text-muted">Yeterli veri yok</span></div>;
   const min = Math.min(...data), max = Math.max(...data), range = max - min || 1;
   const pts = data.map((v, i) => `${(i / (data.length - 1)) * W},${H - ((v - min) / range) * (H - 10)}`);
   const area = `0,${H} ${pts.join(" ")} ${W},${H}`;
@@ -85,9 +85,9 @@ export default function AnalyticsPage() {
   const load = async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch(`/api/admin/stats?period=${period}`);
-      if (!res.ok) throw new Error("Veri alınamadı");
-      setStats(await res.json());
+      // Laravel API'den veri çek
+      const data = await apiFetch(`/admin/stats?period=${period}`);
+      setStats(data);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -106,22 +106,22 @@ export default function AnalyticsPage() {
     {
       label: "Toplam Partner",   value: kpis.total_partners.toLocaleString("tr-TR"),
       change: "+12%", trend: "up" as const, color: COLORS.accent,
-      data: partner_trend.length > 1 ? partner_trend.map(p => p.count) : [0, kpis.total_partners],
+      data: partner_trend && partner_trend.length > 1 ? partner_trend.map(p => p.count) : [0, kpis.total_partners],
     },
     {
       label: "Aktif Kullanıcı",  value: kpis.total_users.toLocaleString("tr-TR"),
       change: "+8%", trend: "up" as const, color: COLORS.purple,
-      data: user_trend.length > 1 ? user_trend.map(p => p.count) : [0, kpis.total_users],
+      data: user_trend && user_trend.length > 1 ? user_trend.map(p => p.count) : [0, kpis.total_users],
     },
     {
-      label: "Toplam Hizmet",    value: kpis.total_services.toLocaleString("tr-TR"),
+      label: "Toplam Ürün",    value: kpis.total_products.toLocaleString("tr-TR"),
       change: "+15%", trend: "up" as const, color: COLORS.success,
-      data: [0, kpis.total_services],
+      data: [0, kpis.total_products],
     },
     {
-      label: "Toplam Randevu",   value: kpis.total_appointments.toLocaleString("tr-TR"),
-      change: "+23%", trend: "up" as const, color: COLORS.warning,
-      data: [0, kpis.total_appointments],
+      label: "Açık Rapor",   value: kpis.open_reports.toLocaleString("tr-TR"),
+      change: "-5%", trend: "down" as const, color: COLORS.warning,
+      data: [0, kpis.open_reports],
     },
   ];
 
@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
     <>
       <PageHeader
         title="Analitik"
-        description="Platform performansını ve büyüme trendlerini takip edin"
+        description="Platform performansını ve büyüme trendlerini takip edin (Laravel Backend)"
         actions={[
           { label: "Yenile", icon: RefreshCw, variant: "secondary", onClick: load },
         ]}
@@ -226,12 +226,11 @@ export default function AnalyticsPage() {
           <SectionHeader title="Platform Özeti" subtitle="Gerçek zamanlı istatistikler" />
           {[
             { label: "Aktif Partner",    value: kpis.active_partners,      color: COLORS.success },
-            { label: "Toplam Hizmet",    value: kpis.total_services,       color: COLORS.purple },
             { label: "Toplam Ürün",      value: kpis.total_products,       color: COLORS.accent },
             { label: "Açık Rapor",       value: kpis.open_reports,         color: COLORS.warning },
             { label: "Bu Ay Yeni Üye",   value: kpis.new_users_this_month, color: COLORS.accentLight },
           ].map((item, i) => (
-            <div key={i} className={cn("flex justify-between items-center py-2.5", i < 4 && "border-b border-admin-divider")}>
+            <div key={i} className={cn("flex justify-between items-center py-2.5", i < 3 && "border-b border-admin-divider")}>
               <span className="text-[13px] text-admin-text-secondary">{item.label}</span>
               <span className="text-base font-bold tracking-tight" style={{ color: item.color }}>
                 {item.value.toLocaleString("tr-TR")}
