@@ -3,9 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { FileText, Plus, Pencil, Trash2, Globe } from "lucide-react";
 import {
-  PageHeader, AdminCard, Badge, SearchInput, LoadingSpinner,
-  DataTable, IconBtn, Toast, T,
+  PageHeader, Badge, SearchInput, LoadingSpinner,
+  DataTable, IconBtn, MetricCard, Toast,
 } from "@/components/admin/ui";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import type { PageItem, PagesListResponse, CreatePageBody, PageStatus } from "@/types/admin";
 
 const STATUS_MAP: Record<PageStatus, { label: string; variant: "green" | "yellow" | "gray" }> = {
@@ -22,14 +29,6 @@ const COLS = [
   { key: "guncelleme",  label: "Son Güncelleme" },
   { key: "islem",       label: "", width: "90px" },
 ];
-
-const inp: React.CSSProperties = {
-  width: "100%", padding: "10px 14px",
-  background: "#ffffff",
-  border: `1px solid ${T.border}`,
-  borderRadius: "10px", color: T.textPrimary,
-  fontSize: "14px", outline: "none",
-};
 
 export default function IcerikPage() {
   const [pages, setPages] = useState<PageItem[]>([]);
@@ -109,27 +108,27 @@ export default function IcerikPage() {
     const st = STATUS_MAP[p.status];
     return [
       <div>
-        <div style={{ fontWeight: 600, color: T.textPrimary, fontSize: "13.5px" }}>{p.title}</div>
+        <div className="font-semibold text-foreground text-[13.5px]">{p.title}</div>
         {p.excerpt && (
-          <div style={{ fontSize: "11.5px", color: T.textMuted, marginTop: "2px", maxWidth: "220px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div className="text-[11.5px] text-muted-foreground mt-0.5 max-w-[220px] truncate">
             {p.excerpt}
           </div>
         )}
       </div>,
-      <span style={{ fontSize: "12px", color: T.accent, fontFamily: "monospace" }}>/{p.slug}</span>,
+      <span className="text-xs text-admin-accent font-mono">/{p.slug}</span>,
       <Badge variant={st.variant} dot>{st.label}</Badge>,
-      <span style={{ fontSize: "12px", color: T.textMuted }}>
+      <span className="text-xs text-muted-foreground">
         {p.published_at ? new Date(p.published_at).toLocaleDateString("tr-TR") : "—"}
       </span>,
-      <span style={{ fontSize: "12px", color: T.textMuted }}>
+      <span className="text-xs text-muted-foreground">
         {new Date(p.updated_at).toLocaleDateString("tr-TR")}
       </span>,
-      <div style={{ display: "flex", gap: "5px" }}>
+      <div className="flex gap-1.5">
         {p.status === "PUBLISHED" && (
-          <IconBtn icon={Globe} color={T.success} title="Sayfayı Gör" onClick={() => window.open(`/${p.slug}`, "_blank")} />
+          <IconBtn icon={Globe} color="#16a34a" title="Sayfayı Gör" onClick={() => window.open(`/${p.slug}`, "_blank")} />
         )}
-        <IconBtn icon={Pencil} color={T.accent} title="Düzenle" onClick={() => setEditing(p)} />
-        <IconBtn icon={Trash2} color={T.danger} title="Sil" onClick={() => handleDelete(p.id, p.title)} />
+        <IconBtn icon={Pencil} color="#6366f1" title="Düzenle" onClick={() => setEditing(p)} />
+        <IconBtn icon={Trash2} color="#dc2626" title="Sil" onClick={() => handleDelete(p.id, p.title)} />
       </div>,
     ];
   });
@@ -144,104 +143,118 @@ export default function IcerikPage() {
 
       {toast && <Toast ok={toast.ok} text={toast.text} />}
 
-      {editing && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#fff", borderRadius: "16px", padding: "28px", width: "500px", maxWidth: "90vw", boxShadow: T.shadowLg }}>
-            <div style={{ fontWeight: 700, fontSize: "16px", color: T.textPrimary, marginBottom: "20px" }}>Sayfa Düzenle</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div>
-                <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Başlık</label>
-                <input style={inp} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} />
+      <Dialog open={!!editing} onOpenChange={(open) => { if (!open) setEditing(null); }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Sayfa Düzenle</DialogTitle>
+            <DialogDescription>Sayfa başlığını, durumunu ve özetini güncelleyin.</DialogDescription>
+          </DialogHeader>
+          {editing && (
+            <div className="flex flex-col gap-4 py-2">
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-muted-foreground">Başlık</Label>
+                <Input value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} />
               </div>
-              <div>
-                <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Durum</label>
-                <select style={{ ...inp, cursor: "pointer" }} value={editing.status} onChange={(e) => setEditing({ ...editing, status: e.target.value as PageStatus })}>
-                  <option value="DRAFT">Taslak</option>
-                  <option value="PUBLISHED">Yayında</option>
-                  <option value="ARCHIVED">Arşivde</option>
-                </select>
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-muted-foreground">Durum</Label>
+                <Select value={editing.status} onValueChange={(v) => setEditing({ ...editing, status: v as PageStatus })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DRAFT">Taslak</SelectItem>
+                    <SelectItem value="PUBLISHED">Yayında</SelectItem>
+                    <SelectItem value="ARCHIVED">Arşivde</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Özet</label>
-                <textarea style={{ ...inp, resize: "vertical", minHeight: "72px" }} value={editing.excerpt ?? ""} onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })} />
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-muted-foreground">Özet</Label>
+                <Textarea className="min-h-[72px] resize-y" value={editing.excerpt ?? ""} onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })} />
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-              <button onClick={() => setEditing(null)} style={{ padding: "10px 20px", background: "transparent", border: `1px solid ${T.border}`, borderRadius: "10px", color: T.textSecondary, fontWeight: 600, fontSize: "14px", cursor: "pointer" }}>İptal</button>
-              <button disabled={saving} onClick={handleEdit} style={{ padding: "10px 24px", background: T.accent, border: "none", borderRadius: "10px", color: "#fff", fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>
-                {saving ? "Kaydediliyor…" : "Kaydet"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>İptal</Button>
+            <Button disabled={saving} onClick={handleEdit}>
+              {saving ? "Kaydediliyor…" : "Kaydet"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: "16px", marginBottom: "24px" }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Toplam Sayfa", value: pages.length,                                   color: T.accent,    bg: T.accentDim },
-          { label: "Yayında",      value: pages.filter((p) => p.status === "PUBLISHED").length, color: T.success, bg: T.successDim },
-          { label: "Taslak",       value: pages.filter((p) => p.status === "DRAFT").length,     color: T.warning, bg: T.warningDim },
-          { label: "Arşiv",        value: pages.filter((p) => p.status === "ARCHIVED").length,  color: T.textMuted, bg: "rgba(139,152,184,0.08)" },
+          { label: "Toplam Sayfa", value: pages.length,                                        colorClass: "text-admin-accent" },
+          { label: "Yayında",      value: pages.filter((p) => p.status === "PUBLISHED").length, colorClass: "text-emerald-600" },
+          { label: "Taslak",       value: pages.filter((p) => p.status === "DRAFT").length,     colorClass: "text-amber-600" },
+          { label: "Arşiv",        value: pages.filter((p) => p.status === "ARCHIVED").length,  colorClass: "text-muted-foreground" },
         ].map((s, i) => (
-          <AdminCard key={i} style={{ padding: "16px 20px" }}>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: s.color, letterSpacing: "-0.4px" }}>{s.value}</div>
-            <div style={{ fontSize: "12px", color: T.textMuted, marginTop: "4px" }}>{s.label}</div>
-          </AdminCard>
+          <MetricCard key={i} label={s.label} value={s.value} colorClass={s.colorClass} />
         ))}
       </div>
 
       {adding && (
-        <AdminCard style={{ marginBottom: "20px", border: `1px solid ${T.accentBorder}` }}>
-          <div style={{ fontWeight: 600, color: T.textPrimary, marginBottom: "16px", fontSize: "14px" }}>Yeni Sayfa Oluştur</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", alignItems: "flex-end" }}>
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Başlık *</label>
-              <input style={inp} placeholder="Sayfa başlığı" value={form.title} onChange={(e) => setForm((v) => ({ ...v, title: e.target.value }))} />
+        <Card className="p-5 mb-5 border-admin-accent-border">
+          <div className="font-semibold text-foreground mb-4 text-sm">Yeni Sayfa Oluştur</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">Başlık *</Label>
+              <Input placeholder="Sayfa başlığı" value={form.title} onChange={(e) => setForm((v) => ({ ...v, title: e.target.value }))} />
             </div>
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>URL Yolu (slug)</label>
-              <input style={inp} placeholder="hakkimizda" value={form.slug} onChange={(e) => setForm((v) => ({ ...v, slug: e.target.value }))} />
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">URL Yolu (slug)</Label>
+              <Input placeholder="hakkimizda" value={form.slug} onChange={(e) => setForm((v) => ({ ...v, slug: e.target.value }))} />
             </div>
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Durum</label>
-              <select style={{ ...inp, cursor: "pointer" }} value={form.status} onChange={(e) => setForm((v) => ({ ...v, status: e.target.value as PageStatus }))}>
-                <option value="DRAFT">Taslak</option>
-                <option value="PUBLISHED">Yayınla</option>
-                <option value="ARCHIVED">Arşivle</option>
-              </select>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">Durum</Label>
+              <Select value={form.status} onValueChange={(v) => setForm((prev) => ({ ...prev, status: v as PageStatus }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Taslak</SelectItem>
+                  <SelectItem value="PUBLISHED">Yayınla</SelectItem>
+                  <SelectItem value="ARCHIVED">Arşivle</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div style={{ marginTop: "12px" }}>
-            <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Özet</label>
-            <textarea style={{ ...inp, resize: "vertical", minHeight: "72px" }} placeholder="Kısa açıklama…" value={form.excerpt} onChange={(e) => setForm((v) => ({ ...v, excerpt: e.target.value }))} />
+          <div className="mt-3 flex flex-col gap-1.5">
+            <Label className="text-muted-foreground">Özet</Label>
+            <Textarea className="min-h-[72px] resize-y" placeholder="Kısa açıklama…" value={form.excerpt} onChange={(e) => setForm((v) => ({ ...v, excerpt: e.target.value }))} />
           </div>
-          <div style={{ marginTop: "12px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-            <button onClick={() => setAdding(false)} style={{ padding: "10px 20px", background: "transparent", border: `1px solid ${T.border}`, borderRadius: "10px", color: T.textSecondary, fontWeight: 600, fontSize: "14px", cursor: "pointer" }}>İptal</button>
-            <button disabled={saving} onClick={handleSave} style={{ padding: "10px 24px", background: T.accent, border: "none", borderRadius: "10px", color: "#fff", fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>
+          <div className="mt-3 flex justify-end gap-2.5">
+            <Button variant="outline" onClick={() => setAdding(false)}>İptal</Button>
+            <Button disabled={saving} onClick={handleSave}>
               {saving ? "Oluşturuluyor…" : "Oluştur"}
-            </button>
+            </Button>
           </div>
-        </AdminCard>
+        </Card>
       )}
 
-      <AdminCard style={{ padding: "20px" }}>
-        <div style={{ display: "flex", gap: "12px", marginBottom: "20px", flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: "2px", padding: "4px", background: T.surface, border: `1px solid ${T.border}`, borderRadius: "10px" }}>
+      <Card className="p-5">
+        <div className="flex flex-wrap items-center gap-3 mb-5">
+          <div className="flex gap-0.5 p-1 bg-muted border border-border rounded-lg">
             {(["ALL", "PUBLISHED", "DRAFT", "ARCHIVED"] as const).map((s) => {
               const labels: Record<string, string> = { ALL: "Tümü", PUBLISHED: "Yayında", DRAFT: "Taslak", ARCHIVED: "Arşiv" };
               return (
-                <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: "7px 14px", borderRadius: "7px", fontSize: "13px", fontWeight: statusFilter === s ? 600 : 400, cursor: "pointer", border: "none", background: statusFilter === s ? T.accent : "transparent", color: statusFilter === s ? "#fff" : T.textSecondary, transition: "all 0.18s" }}>
+                <button
+                  key={s}
+                  onClick={() => setStatusFilter(s)}
+                  className={`px-3.5 py-1.5 rounded-md text-[13px] cursor-pointer border-none transition-all ${
+                    statusFilter === s
+                      ? "bg-primary text-primary-foreground font-semibold"
+                      : "bg-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
                   {labels[s]}
                 </button>
               );
             })}
           </div>
-          <div style={{ flex: 1, minWidth: "200px" }}>
+          <div className="flex-1 min-w-[200px]">
             <SearchInput value={search} onChange={setSearch} placeholder="Sayfa ara…" />
           </div>
         </div>
         {loading ? <LoadingSpinner /> : <DataTable columns={COLS} rows={rows} emptyLabel="Sayfa bulunamadı" />}
-      </AdminCard>
+      </Card>
     </>
   );
 }

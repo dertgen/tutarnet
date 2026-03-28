@@ -3,17 +3,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { UserCog, Plus, Pencil, Trash2, ShieldCheck, UserCheck, Eye, EyeOff } from "lucide-react";
 import {
-  PageHeader, AdminCard, Badge, SearchInput, LoadingSpinner,
-  DataTable, AvatarInitials, IconBtn, Toast, T,
+  PageHeader, Badge, SearchInput, LoadingSpinner,
+  DataTable, AvatarInitials, IconBtn, KpiCard, Toast,
 } from "@/components/admin/ui";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import type { StaffListItem, StaffListResponse, CreateStaffBody, AdminRole } from "@/types/admin";
 
 const ROLE_COLORS: Record<AdminRole, string> = {
-  SUPER_ADMIN: T.danger,
-  ADMIN:       T.warning,
-  MODERATOR:   T.accent,
-  EDITOR:      T.purple,
-  VIEWER:      T.textMuted,
+  SUPER_ADMIN: "#dc2626",
+  ADMIN:       "#d97706",
+  MODERATOR:   "#6366f1",
+  EDITOR:      "#7c3aed",
+  VIEWER:      "#94a3b8",
 };
 
 const ROLE_LABELS: Record<AdminRole, string> = {
@@ -33,13 +39,6 @@ const COLS = [
   { key: "islem",      label: "", width: "80px" },
 ];
 
-const inp: React.CSSProperties = {
-  width: "100%", padding: "10px 14px",
-  background: "#ffffff",
-  border: `1px solid ${T.border}`,
-  borderRadius: "10px", color: T.textPrimary,
-  fontSize: "14px", outline: "none",
-};
 
 export default function PersonelPage() {
   const [staff, setStaff] = useState<StaffListItem[]>([]);
@@ -138,32 +137,35 @@ export default function PersonelPage() {
   const rows = filtered.map((s) => {
     const color = ROLE_COLORS[s.role];
     return [
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <div className="flex items-center gap-2.5">
         <AvatarInitials name={s.display_name} color={color} size={36} />
         <div>
-          <div style={{ fontWeight: 600, color: T.textPrimary, fontSize: "13.5px" }}>{s.display_name}</div>
-          <div style={{ fontSize: "11.5px", color: T.textMuted }}>{s.user.email}</div>
+          <div className="font-semibold text-foreground text-[13.5px]">{s.display_name}</div>
+          <div className="text-[11.5px] text-muted-foreground">{s.user.email}</div>
         </div>
       </div>,
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", borderRadius: "20px", background: color + "18", border: `1px solid ${color}30`, fontSize: "12px", fontWeight: 600, color }}>
+      <span
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
+        style={{ background: color + "18", borderColor: color + "30", color }}
+      >
         <ShieldCheck size={12} />
         {ROLE_LABELS[s.role]}
       </span>,
       <Badge variant={s.is_active ? "green" : "gray"}>{s.is_active ? "Aktif" : "Pasif"}</Badge>,
-      <div style={{ fontSize: "12px", color: T.textMuted }}>
+      <div className="text-xs text-muted-foreground">
         <span>{s._count.audit_logs} işlem</span>
-        <span style={{ margin: "0 5px", color: T.divider }}>·</span>
+        <span className="mx-1.5 text-border">·</span>
         <span>{s._count.resolved_reports} rapor</span>
       </div>,
-      <span style={{ fontSize: "12px", color: T.textMuted }}>
+      <span className="text-xs text-muted-foreground">
         {s.last_login
           ? new Date(s.last_login).toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" })
           : "Hiç giriş yok"}
       </span>,
-      <div style={{ display: "flex", gap: "5px" }}>
-        <IconBtn icon={s.is_active ? EyeOff : Eye} color={s.is_active ? T.warning : T.success} title={s.is_active ? "Pasifleştir" : "Aktifleştir"} onClick={() => handleToggleActive(s.id, s.is_active)} />
-        <IconBtn icon={Pencil} color={T.accent} title="Düzenle" onClick={() => setEditing({ ...s })} />
-        <IconBtn icon={Trash2} color={T.danger} title="Sil" onClick={() => handleDelete(s.id, s.display_name)} />
+      <div className="flex gap-1.5">
+        <IconBtn icon={s.is_active ? EyeOff : Eye} color={s.is_active ? "#d97706" : "#16a34a"} title={s.is_active ? "Pasifleştir" : "Aktifleştir"} onClick={() => handleToggleActive(s.id, s.is_active)} />
+        <IconBtn icon={Pencil} color="#6366f1" title="Düzenle" onClick={() => setEditing({ ...s })} />
+        <IconBtn icon={Trash2} color="#dc2626" title="Sil" onClick={() => handleDelete(s.id, s.display_name)} />
       </div>,
     ];
   });
@@ -178,85 +180,86 @@ export default function PersonelPage() {
 
       {toast && <Toast ok={toast.ok} text={toast.text} />}
 
-      {editing && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#fff", borderRadius: "16px", padding: "28px", width: "460px", maxWidth: "90vw", boxShadow: T.shadowLg }}>
-            <div style={{ fontWeight: 700, fontSize: "16px", color: T.textPrimary, marginBottom: "20px" }}>Personel Düzenle</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div>
-                <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Görünen Ad</label>
-                <input style={inp} value={editing.display_name} onChange={(e) => setEditing({ ...editing, display_name: e.target.value })} />
+      <Dialog open={!!editing} onOpenChange={(open) => { if (!open) setEditing(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Personel Düzenle</DialogTitle>
+            <DialogDescription>Personelin görünen adını ve rolünü güncelleyin.</DialogDescription>
+          </DialogHeader>
+          {editing && (
+            <div className="flex flex-col gap-4 py-2">
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-muted-foreground">Görünen Ad</Label>
+                <Input value={editing.display_name} onChange={(e) => setEditing({ ...editing, display_name: e.target.value })} />
               </div>
-              <div>
-                <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Rol</label>
-                <select style={{ ...inp, cursor: "pointer" }} value={editing.role} onChange={(e) => setEditing({ ...editing, role: e.target.value as AdminRole })}>
-                  {(Object.keys(ROLE_LABELS) as AdminRole[]).map((r) => (
-                    <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                  ))}
-                </select>
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-muted-foreground">Rol</Label>
+                <Select value={editing.role} onValueChange={(v) => setEditing({ ...editing, role: v as AdminRole })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(ROLE_LABELS) as AdminRole[]).map((r) => (
+                      <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-              <button onClick={() => setEditing(null)} style={{ padding: "10px 20px", background: "transparent", border: `1px solid ${T.border}`, borderRadius: "10px", color: T.textSecondary, fontWeight: 600, fontSize: "14px", cursor: "pointer" }}>İptal</button>
-              <button disabled={saving} onClick={handleEdit} style={{ padding: "10px 24px", background: T.accent, border: "none", borderRadius: "10px", color: "#fff", fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>
-                {saving ? "Kaydediliyor…" : "Kaydet"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>İptal</Button>
+            <Button disabled={saving} onClick={handleEdit}>
+              {saving ? "Kaydediliyor…" : "Kaydet"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: "16px", marginBottom: "24px" }}>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Toplam Personel",       value: staff.length,                                                                          color: T.accent,  bg: T.accentDim,  icon: UserCog },
-          { label: "Aktif",                  value: staff.filter((s) => s.is_active).length,                                             color: T.success, bg: T.successDim, icon: UserCheck },
-          { label: "Admin / Süper Admin",    value: staff.filter((s) => s.role === "ADMIN" || s.role === "SUPER_ADMIN").length,           color: T.warning, bg: T.warningDim, icon: ShieldCheck },
+          { label: "Toplam Personel",    value: staff.length,                                                               colorClass: "text-admin-accent bg-admin-accent/10", icon: UserCog },
+          { label: "Aktif",              value: staff.filter((s) => s.is_active).length,                                   colorClass: "text-emerald-600 bg-emerald-50",         icon: UserCheck },
+          { label: "Admin / Süper Admin", value: staff.filter((s) => s.role === "ADMIN" || s.role === "SUPER_ADMIN").length, colorClass: "text-amber-600 bg-amber-50",            icon: ShieldCheck },
         ].map((st, i) => (
-          <AdminCard key={i} style={{ padding: "18px 20px", display: "flex", alignItems: "center", gap: "14px" }}>
-            <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: st.bg, border: `1px solid ${st.color}28`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <st.icon size={18} color={st.color} strokeWidth={1.8} />
-            </div>
-            <div>
-              <div style={{ fontSize: "24px", fontWeight: 800, color: st.color, letterSpacing: "-0.4px" }}>{st.value}</div>
-              <div style={{ fontSize: "12px", color: T.textMuted, marginTop: "2px" }}>{st.label}</div>
-            </div>
-          </AdminCard>
+          <KpiCard key={i} label={st.label} value={st.value} icon={<st.icon size={18} strokeWidth={1.8} />} colorClass={st.colorClass} />
         ))}
       </div>
 
       {adding && (
-        <AdminCard style={{ marginBottom: "20px", border: `1px solid ${T.accentBorder}` }}>
-          <div style={{ fontWeight: 600, color: T.textPrimary, marginBottom: "16px", fontSize: "14px" }}>Yeni Personel Ekle</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: "12px", alignItems: "flex-end" }}>
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Kullanıcı ID</label>
-              <input style={inp} placeholder="UUID" value={form.user_id} onChange={(e) => setForm((v) => ({ ...v, user_id: e.target.value }))} />
+        <Card className="p-5 mb-5 border-admin-accent-border">
+          <div className="font-semibold text-foreground mb-4 text-sm">Yeni Personel Ekle</div>
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end">
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">Kullanıcı ID</Label>
+              <Input placeholder="UUID" value={form.user_id} onChange={(e) => setForm((v) => ({ ...v, user_id: e.target.value }))} />
             </div>
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Görünen Ad</label>
-              <input style={inp} placeholder="örn. Ahmet Y." value={form.display_name} onChange={(e) => setForm((v) => ({ ...v, display_name: e.target.value }))} />
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">Görünen Ad</Label>
+              <Input placeholder="örn. Ahmet Y." value={form.display_name} onChange={(e) => setForm((v) => ({ ...v, display_name: e.target.value }))} />
             </div>
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Rol</label>
-              <select style={{ ...inp, cursor: "pointer" }} value={form.role} onChange={(e) => setForm((v) => ({ ...v, role: e.target.value as AdminRole }))}>
-                {(Object.keys(ROLE_LABELS) as AdminRole[]).map((r) => (
-                  <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                ))}
-              </select>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">Rol</Label>
+              <Select value={form.role} onValueChange={(v) => setForm((prev) => ({ ...prev, role: v as AdminRole }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(ROLE_LABELS) as AdminRole[]).map((r) => (
+                    <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <button disabled={saving} onClick={handleSave} style={{ padding: "10px 20px", background: T.accent, border: "none", borderRadius: "10px", color: "#fff", fontWeight: 700, fontSize: "14px", cursor: "pointer", whiteSpace: "nowrap" }}>
+            <Button disabled={saving} onClick={handleSave} className="whitespace-nowrap">
               {saving ? "Kaydediliyor…" : "Kaydet"}
-            </button>
+            </Button>
           </div>
-        </AdminCard>
+        </Card>
       )}
 
-      <AdminCard style={{ padding: "20px" }}>
-        <div style={{ marginBottom: "20px" }}>
+      <Card className="p-5">
+        <div className="mb-5">
           <SearchInput value={search} onChange={setSearch} placeholder="İsim veya e-posta ara…" />
         </div>
         {loading ? <LoadingSpinner /> : <DataTable columns={COLS} rows={rows} emptyLabel="Personel bulunamadı" />}
-      </AdminCard>
+      </Card>
     </>
   );
 }

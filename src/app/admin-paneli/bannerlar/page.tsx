@@ -3,8 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { Image, Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import {
-  PageHeader, AdminCard, Badge, LoadingSpinner, DataTable, IconBtn, Toast, T,
+  PageHeader, Badge, LoadingSpinner, DataTable, IconBtn, MetricCard, Toast,
 } from "@/components/admin/ui";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { BannerItem, BannersListResponse, CreateBannerBody, BannerPlacement } from "@/types/admin";
 
 const PLACEMENT_LABELS: Record<BannerPlacement, string> = {
@@ -23,14 +28,6 @@ const COLS = [
   { key: "durum",   label: "Durum" },
   { key: "islem",   label: "", width: "100px" },
 ];
-
-const inp: React.CSSProperties = {
-  width: "100%", padding: "10px 14px",
-  background: "#ffffff",
-  border: `1px solid ${T.border}`,
-  borderRadius: "10px", color: T.textPrimary,
-  fontSize: "14px", outline: "none",
-};
 
 export default function BannerlarPage() {
   const [banners, setBanners] = useState<BannerItem[]>([]);
@@ -97,24 +94,24 @@ export default function BannerlarPage() {
 
   const rows = banners.map((b) => [
     <div>
-      <div style={{ fontWeight: 600, color: T.textPrimary, fontSize: "13.5px" }}>{b.title}</div>
-      {b.subtitle && <div style={{ fontSize: "12px", color: T.textMuted, marginTop: "2px" }}>{b.subtitle}</div>}
+      <div className="font-semibold text-foreground text-[13.5px]">{b.title}</div>
+      {b.subtitle && <div className="text-xs text-muted-foreground mt-0.5">{b.subtitle}</div>}
       {b.link_url && (
-        <div style={{ fontSize: "11px", color: T.accent, marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>
+        <div className="text-[11px] text-admin-accent mt-0.5 max-w-[200px] truncate">
           {b.link_url}
         </div>
       )}
     </div>,
-    <span style={{ fontSize: "12.5px", color: T.textSecondary }}>{PLACEMENT_LABELS[b.placement] ?? b.placement}</span>,
-    <span style={{ fontSize: "13px", fontWeight: 600, color: T.accent }}>{b.priority}</span>,
-    <div style={{ fontSize: "11.5px", color: T.textMuted }}>
+    <span className="text-[12.5px] text-muted-foreground">{PLACEMENT_LABELS[b.placement] ?? b.placement}</span>,
+    <span className="text-[13px] font-semibold text-admin-accent">{b.priority}</span>,
+    <div className="text-[11.5px] text-muted-foreground">
       {b.start_at ? <div>Başl: {new Date(b.start_at).toLocaleDateString("tr-TR")}</div> : null}
       {b.end_at ? <div>Bitiş: {new Date(b.end_at).toLocaleDateString("tr-TR")}</div> : <div>Süresiz</div>}
     </div>,
     <Badge variant={b.is_active ? "green" : "gray"} dot>{b.is_active ? "Aktif" : "Pasif"}</Badge>,
-    <div style={{ display: "flex", gap: "5px" }}>
-      <IconBtn icon={b.is_active ? EyeOff : Eye} color={b.is_active ? T.warning : T.success} title={b.is_active ? "Pasifleştir" : "Aktifleştir"} onClick={() => handleToggle(b.id, b.is_active)} />
-      <IconBtn icon={Trash2} color={T.danger} title="Sil" onClick={() => handleDelete(b.id, b.title)} />
+    <div className="flex gap-1.5">
+      <IconBtn icon={b.is_active ? EyeOff : Eye} color={b.is_active ? "#d97706" : "#16a34a"} title={b.is_active ? "Pasifleştir" : "Aktifleştir"} onClick={() => handleToggle(b.id, b.is_active)} />
+      <IconBtn icon={Trash2} color="#dc2626" title="Sil" onClick={() => handleDelete(b.id, b.title)} />
     </div>,
   ]);
 
@@ -128,59 +125,59 @@ export default function BannerlarPage() {
 
       {toast && <Toast ok={toast.ok} text={toast.text} />}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: "16px", marginBottom: "24px" }}>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Toplam", value: banners.length,                         color: T.accent,  bg: T.accentDim },
-          { label: "Aktif",  value: banners.filter((b) => b.is_active).length,  color: T.success, bg: T.successDim },
-          { label: "Pasif",  value: banners.filter((b) => !b.is_active).length, color: T.textMuted, bg: "rgba(139,152,184,0.08)" },
+          { label: "Toplam", value: banners.length,                              colorClass: "text-admin-accent" },
+          { label: "Aktif",  value: banners.filter((b) => b.is_active).length,  colorClass: "text-emerald-600" },
+          { label: "Pasif",  value: banners.filter((b) => !b.is_active).length, colorClass: "text-muted-foreground" },
         ].map((s, i) => (
-          <AdminCard key={i} style={{ padding: "16px 20px" }}>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: s.color, letterSpacing: "-0.4px" }}>{s.value}</div>
-            <div style={{ fontSize: "12px", color: T.textMuted, marginTop: "4px" }}>{s.label}</div>
-          </AdminCard>
+          <MetricCard key={i} label={s.label} value={s.value} colorClass={s.colorClass} />
         ))}
       </div>
 
       {adding && (
-        <AdminCard style={{ marginBottom: "20px", border: `1px solid ${T.accentBorder}` }}>
-          <div style={{ fontWeight: 600, color: T.textPrimary, marginBottom: "16px", fontSize: "14px" }}>Yeni Banner Ekle</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <Card className="p-5 mb-5 border-admin-accent-border">
+          <div className="font-semibold text-foreground mb-4 text-sm">Yeni Banner Ekle</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { label: "Başlık *",    key: "title",     placeholder: "Banner başlığı" },
-              { label: "Alt Başlık",  key: "subtitle",  placeholder: "İsteğe bağlı" },
-              { label: "Görsel URL",  key: "image_url", placeholder: "https://…" },
-              { label: "Bağlantı URL", key: "link_url", placeholder: "https://…" },
+              { label: "Başlık *",     key: "title",     placeholder: "Banner başlığı" },
+              { label: "Alt Başlık",   key: "subtitle",  placeholder: "İsteğe bağlı" },
+              { label: "Görsel URL",   key: "image_url", placeholder: "https://…" },
+              { label: "Bağlantı URL", key: "link_url",  placeholder: "https://…" },
             ].map(({ label, key, placeholder }) => (
-              <div key={key}>
-                <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>{label}</label>
-                <input style={inp} placeholder={placeholder} value={(form as Record<string, string>)[key]} onChange={(e) => setForm((v) => ({ ...v, [key]: e.target.value }))} />
+              <div key={key} className="flex flex-col gap-1.5">
+                <Label className="text-muted-foreground">{label}</Label>
+                <Input placeholder={placeholder} value={(form as Record<string, string>)[key]} onChange={(e) => setForm((v) => ({ ...v, [key]: e.target.value }))} />
               </div>
             ))}
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Konum</label>
-              <select style={{ ...inp, cursor: "pointer" }} value={form.placement} onChange={(e) => setForm((v) => ({ ...v, placement: e.target.value as BannerPlacement }))}>
-                {(Object.entries(PLACEMENT_LABELS) as [BannerPlacement, string][]).map(([k, label]) => (
-                  <option key={k} value={k}>{label}</option>
-                ))}
-              </select>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">Konum</Label>
+              <Select value={form.placement} onValueChange={(v) => setForm((prev) => ({ ...prev, placement: v as BannerPlacement }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.entries(PLACEMENT_LABELS) as [BannerPlacement, string][]).map(([k, label]) => (
+                    <SelectItem key={k} value={k}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div>
-              <label style={{ fontSize: "12px", color: T.textMuted, marginBottom: "6px", display: "block" }}>Öncelik (0-100)</label>
-              <input style={inp} type="number" min={0} max={100} value={form.priority} onChange={(e) => setForm((v) => ({ ...v, priority: e.target.value }))} />
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-muted-foreground">Öncelik (0-100)</Label>
+              <Input type="number" min={0} max={100} value={form.priority} onChange={(e) => setForm((v) => ({ ...v, priority: e.target.value }))} />
             </div>
           </div>
-          <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-            <button onClick={() => setAdding(false)} style={{ padding: "10px 20px", background: "transparent", border: `1px solid ${T.border}`, borderRadius: "10px", color: T.textSecondary, fontWeight: 600, fontSize: "14px", cursor: "pointer" }}>İptal</button>
-            <button disabled={saving} onClick={handleSave} style={{ padding: "10px 24px", background: T.accent, border: "none", borderRadius: "10px", color: "#fff", fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>
+          <div className="mt-4 flex justify-end gap-2.5">
+            <Button variant="outline" onClick={() => setAdding(false)}>İptal</Button>
+            <Button disabled={saving} onClick={handleSave}>
               {saving ? "Kaydediliyor…" : "Kaydet"}
-            </button>
+            </Button>
           </div>
-        </AdminCard>
+        </Card>
       )}
 
-      <AdminCard style={{ padding: "20px" }}>
+      <Card className="p-5">
         {loading ? <LoadingSpinner /> : <DataTable columns={COLS} rows={rows} emptyLabel="Banner bulunamadı" />}
-      </AdminCard>
+      </Card>
     </>
   );
 }

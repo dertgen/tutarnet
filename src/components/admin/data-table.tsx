@@ -28,13 +28,13 @@ export function DataTable({ columns, rows, emptyLabel = "Kayıt bulunamadı", cl
     <div className={cn("w-full overflow-x-auto rounded-md border", className)}>
       <Table className="text-sm">
         <TableHeader>
-          <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
             {columns.map((col) => (
               <TableHead
                 key={col.key}
-                style={{ width: col.width }}
+                style={col.width ? { width: col.width } : undefined}
                 className={cn(
-                  "px-4 py-3 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-slate-500 h-10",
+                  "px-4 py-3 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-muted-foreground h-10",
                   col.align === "center" && "text-center",
                   col.align === "right" && "text-right",
                   !col.align && "text-left",
