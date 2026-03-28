@@ -11,11 +11,11 @@ import { LoadingSpinner, ErrorState } from "@/components/admin/feedback";
 import { Badge } from "@/components/admin/badge";
 import type { StatsResponse } from "@/types/admin";
 import {
-  Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter,
+  Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 function Sparkline({ values, colorClass, height = 36, id = "sg" }: { values: number[]; colorClass: string; height?: number; id?: string }) {
@@ -44,14 +44,6 @@ function Sparkline({ values, colorClass, height = 36, id = "sg" }: { values: num
   );
 }
 
-function ProgressBar({ value, max, colorClass }: { value: number; max: number; colorClass: string }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  return (
-    <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-      <div className={`h-full rounded-full transition-all duration-[800ms] ${colorClass}`} style={{ width: `${pct}%` }} />
-    </div>
-  );
-}
 
 function SegmentedBar({ segments }: { segments: { value: number; color: string; label: string }[] }) {
   const total = segments.reduce((s, seg) => s + seg.value, 0) || 1;
