@@ -2,18 +2,25 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Store, Users, ShoppingBag, Calendar, AlertCircle, ArrowUpRight, RefreshCw, TrendingUp } from "lucide-react";
+import {
+  Store, Users, ShoppingBag, Calendar, AlertCircle, ArrowUpRight,
+  RefreshCw, TrendingUp, TrendingDown, BarChart3, Shield, Activity,
+  Clock, Minus, Eye,
+} from "lucide-react";
 import { LoadingSpinner, ErrorState } from "@/components/admin/feedback";
 import { Badge } from "@/components/admin/badge";
 import type { StatsResponse } from "@/types/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card, CardContent, CardHeader, CardTitle, CardDescription,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-function Sparkline({ values, colorClass }: { values: number[]; colorClass: string }) {
+function Sparkline({ values, colorClass, height = 36, id = "sg" }: { values: number[]; colorClass: string; height?: number; id?: string }) {
   if (values.length < 2) return null;
-  const W = 88, H = 36;
+  const W = 88, H = height;
   const min = Math.min(...values), max = Math.max(...values), range = max - min || 1;
   const pts = values.map((v, i) => {
     const x = (i / (values.length - 1)) * W;
@@ -21,26 +28,35 @@ function Sparkline({ values, colorClass }: { values: number[]; colorClass: strin
     return `${x},${y}`;
   });
   const area = `0,${H} ${pts.join(" ")} ${W},${H}`;
+  const gradientId = `${id}-sparkline`;
 
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="overflow-visible block">
       <defs>
-        <linearGradient id={`sg-sparkline`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" className={`${colorClass} opacity-25`} stopColor="currentColor" />
           <stop offset="100%" className={`${colorClass} opacity-0`} stopColor="currentColor" />
         </linearGradient>
       </defs>
-      <polygon points={area} fill={`url(#sg-sparkline)`} />
+      <polygon points={area} fill={`url(#${gradientId})`} />
       <polyline points={pts.join(" ")} fill="none" className={colorClass} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }
 
-function ProgressBar({ value, max, colorClass }: { value: number; max: number; colorClass: string }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+
+function SegmentedBar({ segments }: { segments: { value: number; color: string; label: string }[] }) {
+  const total = segments.reduce((s, seg) => s + seg.value, 0) || 1;
   return (
-    <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-      <div className={`h-full rounded-full transition-all duration-[800ms] ${colorClass}`} style={{ width: `${pct}%` }} />
+    <div className="flex h-2.5 rounded-full overflow-hidden bg-secondary gap-0.5">
+      {segments.filter(s => s.value > 0).map((seg, i) => (
+        <div
+          key={i}
+          className={cn("h-full rounded-full transition-all duration-700", seg.color)}
+          style={{ width: `${Math.max((seg.value / total) * 100, 2)}%` }}
+          title={`${seg.label}: ${seg.value}`}
+        />
+      ))}
     </div>
   );
 }
@@ -56,6 +72,29 @@ const TYPE_MAP: Record<string, { label: string; variant: "blue" | "purple" }> = 
   E_COMMERCE: { label: "E-Ticaret", variant: "blue" },
   SERVICE:    { label: "Hizmet",    variant: "purple" },
 };
+
+const SEVERITY_MAP: Record<string, { label: string; variant: "red" | "orange" | "yellow" | "gray"; icon: React.ElementType }> = {
+  CRITICAL: { label: "Kritik",  variant: "red",    icon: Shield },
+  HIGH:     { label: "Yüksek",  variant: "orange", icon: AlertCircle },
+  MEDIUM:   { label: "Orta",    variant: "yellow", icon: Activity },
+  LOW:      { label: "Düşük",   variant: "gray",   icon: Eye },
+};
+
+const CARD_COLORS = [
+  { bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-blue-600 dark:text-blue-400", spark: "text-blue-500" },
+  { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-600 dark:text-emerald-400", spark: "text-emerald-500" },
+  { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-600 dark:text-violet-400", spark: "text-violet-500" },
+  { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-600 dark:text-amber-400", spark: "text-amber-500" },
+];
+
+function computeDelta(values: number[]): number | null {
+  if (values.length < 4) return null;
+  const mid = Math.floor(values.length / 2);
+  const first = values.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+  const second = values.slice(mid).reduce((a, b) => a + b, 0) / (values.length - mid);
+  if (first === 0) return null;
+  return Math.round(((second - first) / first) * 100);
+}
 
 export default function AdminDashboard() {
   const [data, setData] = useState<StatsResponse | null>(null);
@@ -82,11 +121,14 @@ export default function AdminDashboard() {
 
   const { kpis, partner_trend, user_trend, recent_partners, pending_reports } = data;
 
+  const partnerSpark = partner_trend.map(p => p.count);
+  const userSpark = user_trend.map(p => p.count);
+
   const statCards = [
-    { title: "Toplam Partner",   value: kpis.total_partners,    icon: Store,       link: "/admin-paneli/partnerler",   spark: partner_trend.map(p => p.count) },
-    { title: "Toplam Kullanıcı", value: kpis.total_users,       icon: Users,       link: "/admin-paneli/kullanicilar", spark: user_trend.map(p => p.count) },
-    { title: "Toplam Ürün",      value: kpis.total_products,    icon: ShoppingBag, link: "/admin-paneli/partnerler",   spark: [] },
-    { title: "Toplam Randevu",   value: kpis.total_appointments,icon: Calendar,    link: "/admin-paneli/partnerler",   spark: [] },
+    { title: "Toplam Partner",   value: kpis.total_partners,    icon: Store,       link: "/admin-paneli/partnerler",   spark: partnerSpark,  delta: computeDelta(partnerSpark) },
+    { title: "Toplam Kullanıcı", value: kpis.total_users,       icon: Users,       link: "/admin-paneli/kullanicilar", spark: userSpark,     delta: computeDelta(userSpark) },
+    { title: "Toplam Ürün",      value: kpis.total_products,    icon: ShoppingBag, link: "/admin-paneli/partnerler",   spark: [] as number[], delta: null as number | null },
+    { title: "Toplam Randevu",   value: kpis.total_appointments,icon: Calendar,    link: "/admin-paneli/partnerler",   spark: [] as number[], delta: null as number | null },
   ];
 
   return (
@@ -122,97 +164,158 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((c, i) => (
           <Link key={i} href={c.link} className="outline-none focus:ring-2 focus:ring-ring rounded-xl block">
-            <StatKpiCard {...c} />
+            <StatKpiCard {...c} colorIdx={i} />
           </Link>
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-card shadow-sm border-admin-border rounded-xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-muted-foreground" />
-              Partner Dağılımı
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[
-              { label: "E-Ticaret",       value: kpis.ecommerce_partners, total: kpis.total_partners },
-              { label: "Hizmet",          value: kpis.service_partners,   total: kpis.total_partners },
-              { label: "Aktif",           value: kpis.active_partners,    total: kpis.total_partners },
-              { label: "Onay Bekliyor",   value: kpis.pending_partners,   total: kpis.total_partners },
-            ].map((seg, i) => (
-              <div key={i}>
-                <div className="flex justify-between items-center mb-1.5 text-xs">
-                  <span className="text-muted-foreground font-medium">{seg.label}</span>
-                  <span className="font-semibold">{seg.value}<span className="text-muted-foreground font-normal"> / {seg.total}</span></span>
+        <Card className="bg-card shadow-sm border rounded-xl hover:shadow-md transition-shadow duration-200">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <BarChart3 className="w-4 h-4 text-violet-500" />
                 </div>
-                <ProgressBar value={seg.value} max={seg.total || 1} colorClass="bg-admin-accent" />
-              </div>
-            ))}
+                Partner Dağılımı
+              </CardTitle>
+              <span className="text-xs text-muted-foreground font-medium">{kpis.total_partners} toplam</span>
+            </div>
+            <CardDescription className="text-xs text-muted-foreground mt-1">Tip ve durum bazında dağılım</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5 pt-2">
+            <SegmentedBar segments={[
+              { value: kpis.ecommerce_partners, color: "bg-blue-500", label: "E-Ticaret" },
+              { value: kpis.service_partners, color: "bg-purple-500", label: "Hizmet" },
+            ]} />
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "E-Ticaret",     value: kpis.ecommerce_partners, color: "bg-blue-500",   textColor: "text-blue-600 dark:text-blue-400" },
+                { label: "Hizmet",        value: kpis.service_partners,   color: "bg-purple-500",  textColor: "text-purple-600 dark:text-purple-400" },
+                { label: "Aktif",         value: kpis.active_partners,    color: "bg-emerald-500", textColor: "text-emerald-600 dark:text-emerald-400" },
+                { label: "Onay Bekliyor", value: kpis.pending_partners,   color: "bg-amber-500",   textColor: "text-amber-600 dark:text-amber-400" },
+              ].map((seg, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 border border-transparent hover:border-border transition-colors">
+                  <div className={cn("w-2.5 h-2.5 rounded-full shrink-0", seg.color)} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs text-muted-foreground truncate">{seg.label}</div>
+                    <div className={cn("text-sm font-bold", seg.textColor)}>{seg.value}</div>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground font-medium">
+                    {kpis.total_partners > 0 ? Math.round((seg.value / kpis.total_partners) * 100) : 0}%
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card shadow-sm border-admin-border rounded-xl">
-          <CardHeader className="pb-4">
+        <Card className="bg-card shadow-sm border rounded-xl hover:shadow-md transition-shadow duration-200">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Store className="w-4 h-4 text-muted-foreground" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-emerald-500" />
+              </div>
               Platform Özeti
             </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground mt-1">Anlık platform metrikleri</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-1">
+          <CardContent className="flex flex-col gap-0 pt-2">
             {[
-              { label: "Aktif Partner",      value: kpis.active_partners },
-              { label: "Toplam Hizmet",      value: kpis.total_services },
-              { label: "Açık Rapor",         value: kpis.open_reports },
-              { label: "Bu Ay Yeni Üye",     value: kpis.new_users_this_month },
-            ].map((item, i, w) => (
-              <div key={i} className={`flex justify-between items-center py-2.5 ${i < w.length - 1 ? "border-b" : ""}`}>
-                <span className="text-sm text-muted-foreground">{item.label}</span>
-                <span className="text-base font-bold">{item.value.toLocaleString("tr-TR")}</span>
-              </div>
-            ))}
+              { label: "Aktif Partner",      value: kpis.active_partners,      icon: Store,    color: "text-emerald-500", bg: "bg-emerald-500/10" },
+              { label: "Toplam Hizmet",      value: kpis.total_services,       icon: ShoppingBag, color: "text-blue-500", bg: "bg-blue-500/10" },
+              { label: "Açık Rapor",         value: kpis.open_reports,         icon: Shield,   color: "text-red-500",     bg: "bg-red-500/10" },
+              { label: "Bu Ay Yeni Üye",     value: kpis.new_users_this_month, icon: Users,    color: "text-violet-500",  bg: "bg-violet-500/10" },
+            ].map((item, i, w) => {
+              const ItemIcon = item.icon;
+              return (
+                <div key={i} className={cn("flex items-center gap-3 py-3", i < w.length - 1 && "border-b")}>
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", item.bg)}>
+                    <ItemIcon className={cn("w-4 h-4", item.color)} strokeWidth={1.8} />
+                  </div>
+                  <span className="text-sm text-muted-foreground flex-1">{item.label}</span>
+                  <span className="text-base font-bold tabular-nums">{item.value.toLocaleString("tr-TR")}</span>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       </div>
 
       {pending_reports.length > 0 && (
-        <Card className="bg-card shadow-sm border-admin-border rounded-xl">
+        <Card className="bg-card shadow-sm border rounded-xl hover:shadow-md transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-sm font-bold">Bekleyen Raporlar</CardTitle>
-            <Link href="/admin-paneli/moderasyon" className="text-xs font-semibold text-admin-accent flex items-center gap-1 hover:underline">
-              Tümünü Gör <ArrowUpRight className="w-3 h-3" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-red-500" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-bold">Bekleyen Raporlar</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">{pending_reports.length} rapor inceleme bekliyor</CardDescription>
+              </div>
+            </div>
+            <Button asChild variant="outline" size="sm" className="gap-1 text-xs h-8">
+              <Link href="/admin-paneli/moderasyon">
+                Tümünü Gör <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            </Button>
           </CardHeader>
           <CardContent className="flex flex-col">
-            {pending_reports.map((r, i, arr) => (
-              <div key={r.id} className={`flex items-center gap-3 py-3 ${i < arr.length - 1 ? "border-b" : ""}`}>
-                <div className={`w-2 h-2 rounded-full shrink-0 ${r.severity === "HIGH" ? "bg-red-500" : r.severity === "MEDIUM" ? "bg-amber-500" : "bg-muted-foreground"}`} />
-                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                  <span className="text-sm font-medium truncate">{r.reason}</span>
-                  <span className="text-xs text-muted-foreground truncate">{r.target_label}</span>
+            {pending_reports.map((r, i, arr) => {
+              const sev = SEVERITY_MAP[r.severity] ?? { label: r.severity, variant: "gray" as const, icon: Eye };
+              const SevIcon = sev.icon;
+              return (
+                <div key={r.id} className={cn("flex items-center gap-3 py-3 group", i < arr.length - 1 && "border-b")}>
+                  <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                    sev.variant === "red" && "bg-red-500/10 border-red-500/20",
+                    sev.variant === "orange" && "bg-orange-500/10 border-orange-500/20",
+                    sev.variant === "yellow" && "bg-amber-500/10 border-amber-500/20",
+                    sev.variant === "gray" && "bg-muted/50 border-border",
+                  )}>
+                    <SevIcon className={cn(
+                      "w-4 h-4",
+                      sev.variant === "red" && "text-red-500",
+                      sev.variant === "orange" && "text-orange-500",
+                      sev.variant === "yellow" && "text-amber-500",
+                      sev.variant === "gray" && "text-muted-foreground",
+                    )} strokeWidth={1.8} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-sm font-medium truncate">{r.reason}</span>
+                      <Badge variant={sev.variant}>{sev.label}</Badge>
+                    </div>
+                    <span className="text-xs text-muted-foreground truncate block">{r.target_label}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
+                    <Clock className="w-3 h-3" />
+                    {new Date(r.created_at).toLocaleDateString("tr-TR", { day: "2-digit", month: "short" })}
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {new Date(r.created_at).toLocaleDateString("tr-TR", { day: "2-digit", month: "short" })}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       )}
 
-      <Card className="bg-card shadow-sm border-admin-border rounded-xl overflow-hidden">
-        <div className="px-6 py-5 flex items-center justify-between border-b">
-          <div>
-            <h3 className="text-sm font-bold m-0 text-foreground">Son Eklenen Partnerler</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Gerçek zamanlı veriler</p>
+      <Card className="bg-card shadow-sm border rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-200">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <Store className="w-4 h-4 text-blue-500" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-bold">Son Eklenen Partnerler</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">Gerçek zamanlı veriler</CardDescription>
+            </div>
           </div>
-          <Button asChild variant="outline" size="sm" className="hidden sm:flex text-admin-accent hover:text-admin-accent hover:bg-admin-accent/10 border-admin-accent/20 gap-1.5 h-8">
+          <Button asChild variant="outline" size="sm" className="hidden sm:flex gap-1.5 h-8 text-xs">
             <Link href="/admin-paneli/partnerler">
               Tümünü Gör <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </Button>
-        </div>
+        </CardHeader>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -225,18 +328,26 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recent_partners.map((p) => {
+              {recent_partners.map((p, idx) => {
                 const st = STATUS_MAP[p.status] ?? { label: p.status, variant: "gray" as const };
                 const ty = TYPE_MAP[p.type] ?? { label: p.type, variant: "gray" as const };
+                const avatarColors = [
+                  "from-blue-500 to-blue-600",
+                  "from-emerald-500 to-emerald-600",
+                  "from-violet-500 to-violet-600",
+                  "from-amber-500 to-amber-600",
+                  "from-rose-500 to-rose-600",
+                ];
+                const gradientClass = avatarColors[idx % avatarColors.length];
                 return (
-                  <TableRow key={p.id}>
+                  <TableRow key={p.id} className="group hover:bg-accent/50 transition-colors">
                     <TableCell className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-lg bg-admin-accent/10 flex items-center justify-center border border-admin-accent/20 shrink-0 text-admin-accent font-extrabold text-sm uppercase">
+                        <div className={cn("w-9 h-9 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 text-white font-bold text-sm uppercase shadow-sm", gradientClass)}>
                           {p.name.charAt(0)}
                         </div>
                         <div className="min-w-0">
-                          <div className="text-[13px] font-semibold text-foreground truncate">{p.name}</div>
+                          <div className="text-[13px] font-semibold text-foreground truncate group-hover:text-primary transition-colors">{p.name}</div>
                           <div className="text-[11px] text-muted-foreground truncate">{p.user.email}</div>
                         </div>
                       </div>
@@ -244,8 +355,11 @@ export default function AdminDashboard() {
                     <TableCell className="py-3 px-4"><Badge variant={ty.variant}>{ty.label}</Badge></TableCell>
                     <TableCell className="py-3 px-4 text-[13px] text-muted-foreground">{p.city ?? "—"}</TableCell>
                     <TableCell className="py-3 px-4"><Badge variant={st.variant} dot>{st.label}</Badge></TableCell>
-                    <TableCell className="py-3 px-4 text-[12px] text-muted-foreground whitespace-nowrap">
-                      {new Date(p.created_at).toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" })}
+                    <TableCell className="py-3 px-4">
+                      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground whitespace-nowrap">
+                        <Clock className="w-3 h-3" />
+                        {new Date(p.created_at).toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" })}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -263,21 +377,40 @@ export default function AdminDashboard() {
   );
 }
 
-function StatKpiCard({ title, value, icon: Icon, spark }: { title: string; value: number; icon: React.ElementType; spark: number[] }) {
+function StatKpiCard({ title, value, icon: Icon, spark, delta, colorIdx = 0 }: {
+  title: string; value: number; icon: React.ElementType; spark: number[];
+  delta?: number | null; colorIdx?: number;
+}) {
+  const colors = CARD_COLORS[colorIdx % CARD_COLORS.length];
+  const DeltaIcon = delta !== null && delta !== undefined
+    ? delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus
+    : null;
+
   return (
-    <div className="bg-card border rounded-xl p-5 transition-all duration-200 hover:shadow-md hover:border-primary/20 hover:bg-accent/5">
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-10 h-10 rounded-xl bg-admin-accent/10 border border-admin-accent/20 flex items-center justify-center">
-          <Icon className="w-5 h-5 text-admin-accent" strokeWidth={1.8} />
+    <div className="bg-card border rounded-xl p-5 transition-all duration-200 hover:shadow-md hover:ring-1 hover:ring-primary/10 hover:border-primary/20">
+      <div className="flex items-start justify-between mb-3">
+        <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center", colors.bg, colors.border)}>
+          <Icon className={cn("w-5 h-5", colors.text)} strokeWidth={1.8} />
         </div>
+        {delta !== null && delta !== undefined && DeltaIcon && (
+          <div className={cn(
+            "flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full",
+            delta > 0 && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+            delta < 0 && "bg-red-500/10 text-red-600 dark:text-red-400",
+            delta === 0 && "bg-muted text-muted-foreground",
+          )}>
+            <DeltaIcon className="w-3 h-3" />
+            {delta > 0 ? "+" : ""}{delta}%
+          </div>
+        )}
       </div>
-      <div className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-1">
+      <div className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-1 tabular-nums">
         {value.toLocaleString("tr-TR")}
       </div>
-      <div className={`text-[13px] text-muted-foreground ${spark.length > 1 ? "mb-4" : "mb-0"}`}>
+      <div className={cn("text-[13px] text-muted-foreground", spark.length > 1 ? "mb-4" : "mb-0")}>
         {title}
       </div>
-      {spark.length > 1 && <Sparkline values={spark} colorClass="text-admin-accent" />}
+      {spark.length > 1 && <Sparkline values={spark} colorClass={colors.spark} id={`kpi-${colorIdx}`} />}
     </div>
   );
 }
