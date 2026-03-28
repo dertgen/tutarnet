@@ -84,7 +84,7 @@ export default async function MagazalarPage({ searchParams }: { searchParams: Pr
                 return (
                   <Link
                     key={partner.id}
-                    href={`/magaza/${partner.slug}`}
+                    href={`/m/${partner.slug}`}
                     style={{ display: "flex", flexDirection: "column", padding: "16px", border: "1px solid var(--border)", borderRadius: "12px", textDecoration: "none", color: "var(--fg)", backgroundColor: "var(--bg)", transition: "box-shadow 0.2s, border-color 0.2s" }}
                   >
                     <div style={{ width: "100%", height: "110px", backgroundColor: "var(--muted-bg)", borderRadius: "8px", marginBottom: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: 700, color: "var(--fg)", overflow: "hidden" }}>

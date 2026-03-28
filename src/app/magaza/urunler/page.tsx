@@ -88,7 +88,7 @@ export default function UrunlerPage() {
             <RefreshCw size={14} /> Yenile
           </button>
           <Link
-            href="/magaza-paneli/entegrasyon"
+            href="/m/hesabim/entegrasyon"
             style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", background: "var(--fg)", color: "var(--bg)", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}
           >
             <LinkIcon size={14} /> XML Feed Ekle
@@ -129,7 +129,7 @@ export default function UrunlerPage() {
             {search ? "Farklı anahtar kelimeler deneyin." : "XML feed ekleyerek ürünlerinizi otomatik senkronize edin."}
           </p>
           {!search && (
-            <Link href="/magaza-paneli/entegrasyon" style={{ padding: "10px 20px", background: "var(--fg)", color: "var(--bg)", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}>
+            <Link href="/m/hesabim/entegrasyon" style={{ padding: "10px 20px", background: "var(--fg)", color: "var(--bg)", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}>
               XML Feed Ekle
             </Link>
           )}

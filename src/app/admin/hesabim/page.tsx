@@ -83,10 +83,10 @@ export default function AdminDashboard() {
   const { kpis, partner_trend, user_trend, recent_partners, pending_reports } = data;
 
   const statCards = [
-    { title: "Toplam Partner",   value: kpis.total_partners,    icon: Store,       link: "/admin-paneli/partnerler",   spark: partner_trend.map(p => p.count) },
-    { title: "Toplam Kullanıcı", value: kpis.total_users,       icon: Users,       link: "/admin-paneli/kullanicilar", spark: user_trend.map(p => p.count) },
-    { title: "Toplam Ürün",      value: kpis.total_products,    icon: ShoppingBag, link: "/admin-paneli/partnerler",   spark: [] },
-    { title: "Toplam Randevu",   value: kpis.total_appointments,icon: Calendar,    link: "/admin-paneli/partnerler",   spark: [] },
+    { title: "Toplam Partner",   value: kpis.total_partners,    icon: Store,       link: "/admin/hesabim/partnerler",   spark: partner_trend.map(p => p.count) },
+    { title: "Toplam Kullanıcı", value: kpis.total_users,       icon: Users,       link: "/admin/hesabim/kullanicilar", spark: user_trend.map(p => p.count) },
+    { title: "Toplam Ürün",      value: kpis.total_products,    icon: ShoppingBag, link: "/admin/hesabim/partnerler",   spark: [] },
+    { title: "Toplam Randevu",   value: kpis.total_appointments,icon: Calendar,    link: "/admin/hesabim/partnerler",   spark: [] },
   ];
 
   return (
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
             </AlertTitle>
           </div>
           <Button asChild variant="outline" size="sm" className="gap-1 border-amber-500/30 text-amber-500 hover:bg-amber-500/20">
-            <Link href="/admin-paneli/partnerler?status=PENDING">
+            <Link href="/admin/hesabim/partnerler?status=PENDING">
               İncele <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </Button>
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
         <Card className="bg-card shadow-sm border-admin-border rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-sm font-bold">Bekleyen Raporlar</CardTitle>
-            <Link href="/admin-paneli/moderasyon" className="text-xs font-semibold text-admin-accent flex items-center gap-1 hover:underline">
+            <Link href="/admin/hesabim/moderasyon" className="text-xs font-semibold text-admin-accent flex items-center gap-1 hover:underline">
               Tümünü Gör <ArrowUpRight className="w-3 h-3" />
             </Link>
           </CardHeader>
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
             <p className="text-xs text-muted-foreground mt-0.5">Gerçek zamanlı veriler</p>
           </div>
           <Button asChild variant="outline" size="sm" className="hidden sm:flex text-admin-accent hover:text-admin-accent hover:bg-admin-accent/10 border-admin-accent/20 gap-1.5 h-8">
-            <Link href="/admin-paneli/partnerler">
+            <Link href="/admin/hesabim/partnerler">
               Tümünü Gör <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </Button>

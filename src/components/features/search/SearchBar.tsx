@@ -22,14 +22,14 @@ interface SearchSuggestion {
 
 // Demo suggestions
 const demoSuggestions: SearchSuggestion[] = [
-  { id: "1", name: "iPhone 15 Pro", type: "product", url: "/urun/apple-iphone-15-pro-256gb" },
-  { id: "2", name: "iPhone 15", type: "product", url: "/urun/apple-iphone-15-128gb" },
-  { id: "3", name: "iPhone 14", type: "product", url: "/urun/apple-iphone-14-128gb" },
+  { id: "1", name: "iPhone 15 Pro", type: "product", url: "/m/m/apple-iphone-15-pro-256gb" },
+  { id: "2", name: "iPhone 15", type: "product", url: "/m/m/apple-iphone-15-128gb" },
+  { id: "3", name: "iPhone 14", type: "product", url: "/m/m/apple-iphone-14-128gb" },
   { id: "4", name: "Telefon", type: "category", url: "/kategori/telefon" },
   { id: "5", name: "Apple", type: "brand", url: "/kategori/telefon/apple" },
-  { id: "6", name: "Samsung Galaxy S24", type: "product", url: "/urun/samsung-galaxy-s24" },
+  { id: "6", name: "Samsung Galaxy S24", type: "product", url: "/m/m/samsung-galaxy-s24" },
   { id: "7", name: "Samsung", type: "brand", url: "/kategori/telefon/samsung" },
-  { id: "8", name: "MacBook Air", type: "product", url: "/urun/macbook-air-m3" },
+  { id: "8", name: "MacBook Air", type: "product", url: "/m/m/macbook-air-m3" },
 ];
 
 const popularSearches = [

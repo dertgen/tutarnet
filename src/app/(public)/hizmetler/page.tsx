@@ -219,7 +219,7 @@ function HizmetlerContent() {
                         {services.map((service) => (
                             <Link
                                 key={service.id}
-                                href={`/hizmet/${service.id}`}
+                                href={`/h/${service.id}`}
                                 style={{
                                     backgroundColor: "var(--card-bg)",
                                     border: "1px solid var(--border)",

@@ -38,7 +38,7 @@ export default function KurulumPage() {
       }
 
       setStatus("done");
-      setTimeout(() => router.push("/admin-paneli"), 1500);
+      setTimeout(() => router.push("/admin/hesabim"), 1500);
     } catch {
       setMessage("Beklenmeyen bir hata oluştu");
     } finally {

@@ -184,7 +184,7 @@ export default async function MagazaPage({ params }: { params: Promise<{ slug: s
             {products.map((product) => (
               <Link
                 key={product.id}
-                href={"/urun/" + product.id}
+                href={"/m/m/" + product.id}
                 style={{
                   display: "block",
                   padding: "16px",

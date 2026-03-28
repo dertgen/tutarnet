@@ -117,7 +117,7 @@ export default function HesapPage() {
             <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--fg)" }}>Son Fiyat Hareketleri</h2>
             <div style={{ fontSize: "13px", color: "var(--muted-fg)", marginTop: "4px" }}>Takip ettiğiniz ürünlerdeki anlık değişimler.</div>
           </div>
-          <Link href="/hesap/fiyat-alarmlari" style={{ fontSize: "13px", fontWeight: 600, color: "var(--teal)", display: "flex", alignItems: "center", gap: "4px", textDecoration: "none" }}>
+          <Link href="/kullanici/hesabim/fiyat-alarmlari" style={{ fontSize: "13px", fontWeight: 600, color: "var(--teal)", display: "flex", alignItems: "center", gap: "4px", textDecoration: "none" }}>
             Tümünü Gör <ChevronRight size={14} />
           </Link>
         </div>

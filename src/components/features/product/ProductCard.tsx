@@ -36,7 +36,7 @@ export function ProductCard({
   return (
     <Card className="flex flex-col group overflow-hidden transition-all hover:shadow-md hover:border-primary/20">
       <Link 
-        href={`/urun/${slug}`} 
+        href={`/m/m/${slug}`} 
         className="relative aspect-square w-full overflow-hidden bg-muted p-4 flex items-center justify-center"
         aria-label={`${name} ürün detayları`}
       >
@@ -67,7 +67,7 @@ export function ProductCard({
       </Link>
 
       <CardContent className="p-4 flex-1 flex flex-col gap-3">
-        <Link href={`/urun/${slug}`} className="flex-1">
+        <Link href={`/m/m/${slug}`} className="flex-1">
           <h3 className="text-[15px] font-semibold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
             {name}
           </h3>
@@ -101,7 +101,7 @@ export function ProductCard({
       {showCompareButton && (
         <CardFooter className="px-4 pb-4 pt-0">
           <Button asChild variant="outline" className="w-full text-[13px] h-9 font-medium" tabIndex={0}>
-            <Link href={`/urun/${slug}`}>
+            <Link href={`/m/m/${slug}`}>
               Fiyatları Karşılaştır
             </Link>
           </Button>

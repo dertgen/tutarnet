@@ -31,34 +31,34 @@ const NAV: NavGroup[] = [
     key: "dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    href: "/admin-paneli",
+    href: "/admin/hesabim",
   },
   {
     key: "yonetim",
     label: "Yönetim",
     children: [
-      { href: "/admin-paneli/partnerler",   label: "Partnerler",   icon: Store,    description: "Mağaza ve hizmet sağlayıcıları" },
-      { href: "/admin-paneli/kullanicilar", label: "Kullanıcılar", icon: Users,    description: "Platform üyeleri ve hesaplar" },
-      { href: "/admin-paneli/kategoriler",  label: "Kategoriler",  icon: Grid3X3,  description: "Ürün ve hizmet kategorileri" },
+      { href: "/admin/hesabim/partnerler",   label: "Partnerler",   icon: Store,    description: "Mağaza ve hizmet sağlayıcıları" },
+      { href: "/admin/hesabim/kullanicilar", label: "Kullanıcılar", icon: Users,    description: "Platform üyeleri ve hesaplar" },
+      { href: "/admin/hesabim/kategoriler",  label: "Kategoriler",  icon: Grid3X3,  description: "Ürün ve hizmet kategorileri" },
     ],
   },
   {
     key: "icerik",
     label: "İçerik",
     children: [
-      { href: "/admin-paneli/moderasyon",  label: "Moderasyon",  icon: Flag,      description: "Şikayet ve rapor yönetimi" },
-      { href: "/admin-paneli/bannerlar",   label: "Bannerlar",   icon: Image,     description: "Site geneli görsel yönetimi" },
-      { href: "/admin-paneli/icerik",      label: "Sayfalar",    icon: FileText,  description: "Statik sayfa editörü" },
+      { href: "/admin/hesabim/moderasyon",  label: "Moderasyon",  icon: Flag,      description: "Şikayet ve rapor yönetimi" },
+      { href: "/admin/hesabim/bannerlar",   label: "Bannerlar",   icon: Image,     description: "Site geneli görsel yönetimi" },
+      { href: "/admin/hesabim/icerik",      label: "Sayfalar",    icon: FileText,  description: "Statik sayfa editörü" },
     ],
   },
   {
     key: "sistem",
     label: "Sistem",
     children: [
-      { href: "/admin-paneli/analitik",      label: "Analitik",      icon: BarChart3, description: "Performans ve büyüme verileri" },
-      { href: "/admin-paneli/personel",      label: "Personel",      icon: UserCog,   description: "Admin çalışanlar ve roller" },
-      { href: "/admin-paneli/site-ayarlari", label: "Site Ayarları", icon: Settings,  description: "Yapılandırma ve entegrasyonlar" },
-      { href: "/admin-paneli/aktivite",      label: "Aktivite",      icon: Activity,  description: "Denetim günlüğü" },
+      { href: "/admin/hesabim/analitik",      label: "Analitik",      icon: BarChart3, description: "Performans ve büyüme verileri" },
+      { href: "/admin/hesabim/personel",      label: "Personel",      icon: UserCog,   description: "Admin çalışanlar ve roller" },
+      { href: "/admin/hesabim/site-ayarlari", label: "Site Ayarları", icon: Settings,  description: "Yapılandırma ve entegrasyonlar" },
+      { href: "/admin/hesabim/aktivite",      label: "Aktivite",      icon: Activity,  description: "Denetim günlüğü" },
     ],
   },
 ];
@@ -255,7 +255,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-[100] h-14 bg-white/95 backdrop-blur border-b border-slate-200 flex items-center px-5 gap-0">
 
         {/* Logo */}
-        <Link href="/admin-paneli" className="flex items-center gap-2.5 no-underline flex-shrink-0">
+        <Link href="/admin/hesabim" className="flex items-center gap-2.5 no-underline flex-shrink-0">
           <div className="w-[30px] h-[30px] rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center">
             <Zap size={14} className="text-indigo-600" strokeWidth={2.2} />
           </div>

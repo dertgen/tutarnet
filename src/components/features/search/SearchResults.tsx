@@ -86,7 +86,7 @@ export function SearchResults({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
           <Card key={product.id} className="overflow-hidden group">
-            <Link href={`/urun/${product.slug}`}>
+            <Link href={`/m/m/${product.slug}`}>
               <div className="relative aspect-square bg-muted">
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground group-hover:scale-105 transition-transform">
                   <svg
@@ -109,7 +109,7 @@ export function SearchResults({
               </div>
             </Link>
             <CardContent className="p-4">
-              <Link href={`/urun/${product.slug}`}>
+              <Link href={`/m/m/${product.slug}`}>
                 <h3 className="font-semibold line-clamp-2 hover:text-primary transition-colors">
                   {product.name}
                 </h3>
@@ -135,7 +135,7 @@ export function SearchResults({
             </CardContent>
             <CardFooter className="p-4 pt-0">
               <Button className="w-full" variant="outline" size="sm" asChild>
-                <Link href={`/urun/${product.slug}`}>Karşılaştır</Link>
+                <Link href={`/m/m/${product.slug}`}>Karşılaştır</Link>
               </Button>
             </CardFooter>
           </Card>

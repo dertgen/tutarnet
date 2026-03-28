@@ -136,7 +136,7 @@ export default function MagazaPaneliPage() {
             <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--fg)" }}>Mağaza Özeti</h2>
             <div style={{ fontSize: "13px", color: "var(--muted-fg)", marginTop: "4px" }}>Güncel mağaza durumu ve istatistikler.</div>
           </div>
-          <Link href="/magaza-paneli/analitik" style={{ fontSize: "13px", fontWeight: 600, color: "var(--teal)", display: "flex", alignItems: "center", gap: "4px", textDecoration: "none" }}>
+          <Link href="/m/hesabim/analitik" style={{ fontSize: "13px", fontWeight: 600, color: "var(--teal)", display: "flex", alignItems: "center", gap: "4px", textDecoration: "none" }}>
             Detaylı Analitik <ChevronRight size={14} />
           </Link>
         </div>

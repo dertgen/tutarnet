@@ -7,11 +7,11 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { name: "Kontrol Paneli",    href: "/magaza-paneli",             icon: LayoutDashboard },
-  { name: "Ürün Yönetimi",     href: "/magaza-paneli/urunler",     icon: Package },
-  { name: "Tıklama & Analitik",href: "/magaza-paneli/analitik",    icon: Activity },
-  { name: "XML Entegrasyonu",  href: "/magaza-paneli/entegrasyon", icon: LinkIcon },
-  { name: "Profil Ayarları",   href: "/magaza-paneli/ayarlar",     icon: Settings },
+  { name: "Kontrol Paneli",    href: "/m/hesabim",             icon: LayoutDashboard },
+  { name: "Ürün Yönetimi",     href: "/m/hesabim/urunler",     icon: Package },
+  { name: "Tıklama & Analitik",href: "/m/hesabim/analitik",    icon: Activity },
+  { name: "XML Entegrasyonu",  href: "/m/hesabim/entegrasyon", icon: LinkIcon },
+  { name: "Profil Ayarları",   href: "/m/hesabim/ayarlar",     icon: Settings },
 ];
 
 export default function MagazaPaneliLayout({ children }: { children: React.ReactNode }) {
@@ -39,7 +39,7 @@ export default function MagazaPaneliLayout({ children }: { children: React.React
 
         <div className="ml-auto flex items-center gap-3">
           <Link
-            href="/magaza-paneli/entegrasyon"
+            href="/m/hesabim/entegrasyon"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white text-[13px] font-medium rounded-lg hover:bg-slate-800 transition-colors"
           >
             <Package size={13} /> Ürün Ekle / XML

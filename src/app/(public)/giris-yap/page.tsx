@@ -146,7 +146,7 @@ function GirisYapPage() {
         }
         if (session?.access_token) {
           setAuthCookie(session.access_token, session.expires_in ?? 3600);
-          router.push("/magaza-paneli");
+          router.push("/m/hesabim");
           router.refresh();
         } else {
           setSuccessMsg("Başvurunuz alındı! E-postanızı doğruladıktan sonra incelemeye alınacaktır.");

@@ -140,7 +140,7 @@ export default function RandevuPage() {
             {/* Header */}
             <div style={{ backgroundColor: "var(--card-bg)", borderBottom: "1px solid var(--border)" }}>
                 <div style={{ maxWidth: "800px", margin: "0 auto", padding: "16px 24px" }}>
-                    <Link href={`/hizmet/${serviceId}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--muted-fg)", textDecoration: "none" }}>
+                    <Link href={`/h/${serviceId}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--muted-fg)", textDecoration: "none" }}>
                         <ChevronLeft size={20} />
                         Geri
                     </Link>

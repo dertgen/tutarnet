@@ -9,10 +9,10 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { name: "Genel Bakış",      href: "/hesap",                  icon: LayoutDashboard },
-  { name: "Favori Ürünlerim", href: "/hesap/favoriler",         icon: Heart },
-  { name: "Fiyat Alarmları",  href: "/hesap/fiyat-alarmlari",  icon: BellRing },
-  { name: "Hesap Ayarları",   href: "/hesap/ayarlar",          icon: Settings },
+  { name: "Genel Bakış",      href: "/kullanici/hesabim",                  icon: LayoutDashboard },
+  { name: "Favori Ürünlerim", href: "/kullanici/hesabim/favoriler",         icon: Heart },
+  { name: "Fiyat Alarmları",  href: "/kullanici/hesabim/fiyat-alarmlari",  icon: BellRing },
+  { name: "Hesap Ayarları",   href: "/kullanici/hesabim/ayarlar",          icon: Settings },
 ];
 
 export default function HesapLayout({ children }: { children: React.ReactNode }) {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_ROUTES = ["/admin-paneli"];
-const PARTNER_ROUTES = ["/magaza-paneli"];
-const USER_ROUTES = ["/hesap"];
+const ADMIN_ROUTES = ["/admin/hesabim"];
+const PARTNER_ROUTES = ["/m/hesabim"];
+const USER_ROUTES = ["/kullanici/hesabim"];
 const AUTH_ROUTES = ["/giris-yap", "/kayit-ol", "/magaza-giris", "/magaza-ol"];
 
 function getTokenFromRequest(request: NextRequest): string | null {
@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   const isUserRoute    = USER_ROUTES.some((r) => pathname.startsWith(r));
   const isAuthRoute    = AUTH_ROUTES.some((r) => pathname.startsWith(r));
 
-  const isSetupPage = pathname === "/admin-paneli/kurulum";
+  const isSetupPage = pathname === "/admin/hesabim/kurulum";
 
   if ((isAdminRoute || isPartnerRoute || isUserRoute) && !token && !isSetupPage) {
     const loginPath = isPartnerRoute ? "/magaza-giris" : "/giris-yap";
@@ -33,7 +33,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && token) {
-    return NextResponse.redirect(new URL("/hesap", request.url));
+    return NextResponse.redirect(new URL("/kullanici/hesabim", request.url));
   }
 
   return NextResponse.next();
@@ -41,9 +41,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/admin-paneli/:path*",
-    "/magaza-paneli/:path*",
-    "/hesap/:path*",
+    "/admin/hesabim/:path*",
+    "/m/hesabim/:path*",
+    "/kullanici/hesabim/:path*",
     "/giris-yap",
     "/kayit-ol",
     "/magaza-giris",
