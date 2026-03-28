@@ -68,43 +68,17 @@ export async function requireAdminAuth(
     return {
       ok: false,
       response: NextResponse.json(
-        { error: "Veritabanı bağlantısı kurulamadı" },
+        { error: "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin." },
         { status: 503 }
       ),
     };
   }
 
   if (!staff) {
-    const userRole = (user.user_metadata?.role as string | undefined) ?? "";
-    const isAdmin = userRole === "admin" || user.email?.endsWith("@tutar.net");
-
-    if (!isAdmin) {
-      return {
-        ok: false,
-        response: NextResponse.json({ error: "Yetki reddedildi" }, { status: 403 }),
-      };
-    }
-
-    try {
-      const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-      staff = await prisma.adminStaff.create({
-        data: {
-          user_id: user.id,
-          role: "SUPER_ADMIN",
-          display_name: dbUser?.name ?? user.email?.split("@")[0] ?? "Admin",
-          is_active: true,
-        },
-        include: { permissions: true },
-      });
-    } catch {
-      return {
-        ok: false,
-        response: NextResponse.json(
-          { error: "Admin kaydı oluşturulamadı" },
-          { status: 500 }
-        ),
-      };
-    }
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "Yetki reddedildi. Admin kaydı bulunamadı." }, { status: 403 }),
+    };
   }
 
   if (!staff.is_active) {

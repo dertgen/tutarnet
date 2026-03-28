@@ -29,7 +29,7 @@ function buildPool(): Pool {
     user: url.username,
     password: decodeURIComponent(url.password),
     database: url.pathname.replace(/^\//, "") || "postgres",
-    ssl: { rejectUnauthorized: false },
+    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : { rejectUnauthorized: false },
     max: 3,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
