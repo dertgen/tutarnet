@@ -1,55 +1,50 @@
-# Tutarnet: Akıllı Fiyat ve Hizmet Karşılaştırma Platformu
+# Tutarnet: Zirve Performanslı Fiyat ve Hizmet Karşılaştırma Platformu
 
-![Tutarnet Banner](https://via.placeholder.com/1200x400?text=Tutarnet+Platform)
+![Tutarnet Banner](https://via.placeholder.com/1200x400?text=Tutarnet+SvelteKit+Laravel)
 
 ## 🚀 Proje Vizyonu
 
-Tutarnet, kullanıcıların ürün ve hizmet fiyatlarını şeffaf bir şekilde karşılaştırmasına olanak tanıyan, mağazalar ve hizmet sağlayıcılar için güçlü yönetim panelleri sunan yenilikçi bir platformdur. Amacımız, tüketicilere en iyi fırsatları sunarken, işletmelerin de dijital dünyada daha geniş kitlelere ulaşmasını sağlamaktır. Modern teknolojilerle desteklenen Tutarnet, performans, güvenlik ve kullanıcı deneyimini ön planda tutarak dinamik bir pazar yeri oluşturmayı hedefler.
+Tutarnet, web teknolojilerinin en uç noktası olan **SvelteKit** ve **Laravel** mimarisi üzerine inşa edilmiş, dünyanın en hızlı ve en akıcı fiyat karşılaştırma platformudur. Amacımız, kullanıcılara milisaniyeler içinde sonuç veren, Apple kalitesinde animasyonlarla donatılmış ve SEO skorlarında rakipsiz bir deneyim sunmaktır.
 
 ## ✨ Temel Özellikler
 
-*   **Akıllı Fiyat Karşılaştırma:** Binlerce ürün ve hizmet için anlık fiyat takibi ve karşılaştırma.
-*   **Kapsamlı Mağaza/Hizmet Panelleri:** İşletmelerin ürünlerini/hizmetlerini, siparişlerini ve müşteri ilişkilerini kolayca yönetebileceği sezgisel arayüzler.
-*   **Gelişmiş Admin Paneli:** Platformun tüm yönlerini (kullanıcılar, mağazalar, hizmetler, içerikler, raporlar) yönetmek için merkezi bir kontrol noktası.
-*   **Otomatik Feed Senkronizasyonu:** Laravel Queues ile arka planda çalışan, yüksek performanslı XML/CSV feed işleme sistemi.
-*   **Kullanıcı Hesap Yönetimi:** Favori ürünler, fiyat alarmları ve kişiselleştirilmiş deneyimler.
-*   **Güvenli Kimlik Doğrulama:** Laravel Sanctum ile token tabanlı güvenli API erişimi.
-*   **SEO Dostu URL Yapısı:** Arama motorları için optimize edilmiş, anlamlı ve temiz URL'ler.
-*   **Duyarlı Tasarım:** Tüm cihazlarda sorunsuz bir kullanıcı deneyimi sunan mobil uyumlu arayüz.
+*   **Işık Hızında Performans:** SvelteKit'in sıfır Virtual DOM yapısı ile anında açılan sayfalar.
+*   **Pürüzsüz Animasyonlar:** Svelte'in yerleşik geçiş efektleri ile mobil uygulama kalitesinde kullanıcı deneyimi.
+*   **Güçlü Backend:** Laravel 11 ile ölçeklenebilir, güvenli ve yüksek performanslı API katmanı.
+*   **Akıllı Fiyat Karşılaştırma:** Binlerce ürün ve hizmet için anlık veri senkronizasyonu.
+*   **Kapsamlı Paneller:** Kullanıcı, Mağaza, Hizmet ve Admin için özelleştirilmiş, havalı yönetim arayüzleri.
+*   **SEO Şampiyonu:** Sunucu tarafında render (SSR) ve optimize edilmiş HTML yapısı ile Google dostu mimari.
 
-## 🛠️ Teknik Mimari
+## 🛠️ Teknik Mimari (Zirve Mimari)
 
-Tutarnet, modern web geliştirme standartlarına uygun, ayrıştırılmış (decoupled) bir mimari üzerine inşa edilmiştir.
+Tutarnet, modern web geliştirme dünyasının en "havalı" ve en işlevsel iki devini birleştirir.
 
 ### Ana Teknolojiler
 
 | Kategori | Teknoloji | Açıklama |
 | :--- | :--- | :--- |
-| **Frontend** | Next.js 16, React 19, TypeScript | Hızlı geliştirme, sunucu tarafı render (SSR) ve modern UI deneyimi. |
+| **Frontend** | SvelteKit 5, Svelte 5, TypeScript | Sıfır Virtual DOM, inanılmaz hız ve pürüzsüz animasyonlar. |
 | **Backend (API)** | Laravel 11, PHP 8.3 | Güçlü iş mantığı, Eloquent ORM ve ölçeklenebilir API yönetimi. |
-| **Veritabanı** | PostgreSQL | İlişkisel veri yönetimi, güvenilir ve ölçeklenebilir veri depolama. |
-| **Kimlik Doğrulama** | Laravel Sanctum | Token tabanlı güvenli kullanıcı ve yönetici oturum yönetimi. |
-| **Stil** | Tailwind CSS 4, Shadcn/ui | Hızlı ve tutarlı UI geliştirme için modern CSS araçları. |
+| **Stil** | Tailwind CSS 4 | Dünyanın en hızlı CSS framework'ünün en yeni sürümü. |
+| **Veritabanı** | PostgreSQL | Güvenilir ve ölçeklenebilir ilişkisel veri depolama. |
+| **Kimlik Doğrulama** | Laravel Sanctum | Token tabanlı güvenli API erişimi. |
 
 ### Mimari Diyagramı
 
 ```mermaid
 graph TD
-    A[Kullanıcı/İşletme] -->|Tarayıcı| B(Next.js Frontend)
+    A[Kullanıcı/İşletme] -->|Tarayıcı| B(SvelteKit Frontend)
     B -->|API Çağrıları| C(Laravel API)
     C -->|Eloquent ORM| D[PostgreSQL Veritabanı]
     C -->|Queues/Jobs| E[Redis/Database Queue]
     E -->|Feed İşleme| F(Feed Sağlayıcılar)
     C -->|Auth| G[Laravel Sanctum]
-    B -->|Statik İçerik| H[CDN]
+    B -->|SSR/Hydration| H[Vercel/Node.js]
 ```
 
 ## ⚙️ Kurulum
 
-Projeyi yerel geliştirme ortamınızda çalıştırmak için aşağıdaki adımları izleyin.
-
 ### 1. Backend (Laravel) Kurulumu
-
 ```bash
 cd tutarnet-backend
 composer install
@@ -59,37 +54,19 @@ php artisan migrate
 php artisan serve
 ```
 
-### 2. Frontend (Next.js) Kurulumu
-
+### 2. Frontend (SvelteKit) Kurulumu
 ```bash
 cd tutarnet
 pnpm install
-cp .env.example .env.local
 pnpm dev
 ```
 
-## 🗺️ URL Yapısı
-
-Tutarnet, hem kullanıcı deneyimini hem de arama motoru optimizasyonunu (SEO) desteklemek amacıyla anlamlı ve hiyerarşik bir URL yapısı kullanır.
-
-| Kategori | URL Yapısı | Açıklama |
-| :--- | :--- | :--- |
-| **Ana Sayfa** | `/` | Platformun ana sayfası. |
-| **Ürün Detay** | `/m/[magazaslug]/[urunslug]` | Belirli bir mağazadaki ürünün detay sayfası. |
-| **Mağaza Sayfası** | `/m/[magazaslug]` | Mağaza genel sayfası ve ürün listesi. |
-| **Hizmet Detay** | `/h/[partnerslug]` | Hizmet sağlayıcı detay sayfası. |
-| **Kullanıcı Paneli** | `/kullanici/hesabim` | Kullanıcı yönetim paneli. |
-| **Mağaza Paneli** | `/magaza/hesabim` | Mağaza yönetim paneli. |
-| **Admin Paneli** | `/admin/hesabim` | Platform yönetim paneli. |
-
-## 🔒 Güvenlik
-
-Tutarnet, en üst düzey güvenlik standartlarını benimser:
-*   **Laravel Sanctum:** Güvenli API erişimi ve token yönetimi.
-*   **RBAC:** Rol tabanlı yetkilendirme sistemi.
-*   **Data Validation:** Laravel'in güçlü doğrulama kuralları ile güvenli veri girişi.
-*   **Secure Headers:** CSRF, XSS ve SQL Injection korumaları.
+## 🔒 Güvenlik ve Performans
+*   **SvelteKit SSR:** Veriler sunucuda çekilir, kullanıcıya hazır HTML gönderilir.
+*   **Laravel Sanctum:** Güvenli, token tabanlı oturum yönetimi.
+*   **Tailwind 4:** Modern tarayıcı özellikleri ile optimize edilmiş stil katmanı.
+*   **Pürüzsüz Geçişler:** Sayfalar arası geçişlerde `fade` ve `fly` efektleri ile kesintisiz deneyim.
 
 ---
 
-**Manus AI** tarafından oluşturulmuştur.
+**Manus AI** tarafından web teknolojilerinin zirvesinde oluşturulmuştur.
